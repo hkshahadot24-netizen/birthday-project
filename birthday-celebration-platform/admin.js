@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { uploadConfig } from "./upload-config.js";
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:"select_account"});
@@ -60,7 +61,7 @@ form.addEventListener("submit",async e=>{
   const name=$("recipientName").value.trim(),id=$("slug").value.trim(),photo=$("photoUrl").value.trim();
   if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)){$("formStatus").textContent="Use a valid ID: lowercase letters, numbers and hyphens.";return;}
   if(photo&&!/^https:\/\/\S+$/i.test(photo)){$("formStatus").textContent="Photo URL must start with https://";return;}
-  const data={ownerUid:user.uid,recipientName:name,age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,slug:id,updatedAt:serverTimestamp()};
+  const data={ownerUid:user.uid,recipientName:name,age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,audioUrl:$("audioUrl").value.trim()||null,attachmentUrl:$("attachmentUrl").value.trim()||null,slug:id,updatedAt:serverTimestamp()};
   if(!name||!data.message){$("formStatus").textContent="Name and message are required.";return;}
   $("saveBtn").disabled=true;$("formStatus").textContent="Saving...";
   try{
@@ -103,7 +104,7 @@ $("wishRows").addEventListener("click",async e=>{
     if(action==="edit"){
       const s=await getDoc(doc(db,"wishes",id));if(!s.exists()||s.data().ownerUid!==user.uid)return;
       const d=s.data();editingId=id;$("recipientName").value=d.recipientName||"";$("age").value=d.age??"";$("birthDate").value=d.birthDate||"";
-      $("message").value=d.message||"";$("photoUrl").value=d.photoUrl||"";$("slug").value=id;
+      $("message").value=d.message||"";$("photoUrl").value=d.photoUrl||"";$("audioUrl").value=d.audioUrl||"";$("attachmentUrl").value=d.attachmentUrl||"";$("slug").value=id;
       $("saveBtn").textContent="Save changes";$("formStatus").textContent=`Editing ${id}`;window.scrollTo({top:0,behavior:"smooth"});
     }
   }catch(err){alert(err.message||"Action failed.");}
@@ -111,3 +112,29 @@ $("wishRows").addEventListener("click",async e=>{
 function showQr(url){$("qrCanvas").innerHTML="";new QRCode($("qrCanvas"),{text:url,width:240,height:240,colorDark:"#111827",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});$("qrUrl").textContent=url;$("qrDialog").showModal();}
 $("closeQr").onclick=()=>$("qrDialog").close();
 $("downloadQr").onclick=()=>{const canvas=$("qrCanvas").querySelector("canvas"),img=$("qrCanvas").querySelector("img"),source=canvas||img;if(!source)return;const a=document.createElement("a");a.href=canvas?canvas.toDataURL("image/png"):img.src;a.download="birthday-qr.png";a.click();};
+
+
+// Secure GitHub Assets uploader. GitHub credentials live only in Cloudflare Worker secrets.
+$("uploadAssetBtn").addEventListener("click", async () => {
+  const user=auth.currentUser, file=$("assetFile").files?.[0], status=$("uploadStatus"), btn=$("uploadAssetBtn");
+  if(!user){status.textContent="Please sign in first.";return;}
+  if(!file){status.textContent="Choose an image, audio or supported file first.";return;}
+  if(!uploadConfig.workerUrl || !/^https:\/\//i.test(uploadConfig.workerUrl)){
+    status.textContent="Cloudflare Worker URL is missing. Set workerUrl in upload-config.js after deploying the Worker.";return;
+  }
+  const category=file.type.startsWith("image/")?"Images":file.type.startsWith("audio/")?"Audio":"Files";
+  if(file.size>8*1024*1024){status.textContent="File is larger than 8 MB. Please choose a smaller file.";return;}
+  btn.disabled=true;status.textContent="Uploading securely to GitHub Assets...";
+  try{
+    const token=await user.getIdToken(true), body=new FormData();body.append("file",file);body.append("category",category);
+    const endpoint=uploadConfig.workerUrl.replace(/\/$/,"")+"/upload";
+    const response=await fetch(endpoint,{method:"POST",headers:{Authorization:`Bearer ${token}`},body});
+    const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||`Upload failed (${response.status}).`);
+    if(category==="Images")$("photoUrl").value=result.url;
+    else if(category==="Audio")$("audioUrl").value=result.url;
+    else $("attachmentUrl").value=result.url;
+    status.innerHTML=`Uploaded: <a class="underline text-cyan-200 break-all" target="_blank" rel="noopener" href="${safeText(result.url)}">${safeText(result.path)}</a><br>URL added to the matching project field. Save the birthday project to publish it.`;
+    $("assetFile").value="";
+  }catch(err){status.textContent=err.message||"Upload failed.";}
+  finally{btn.disabled=false;}
+});

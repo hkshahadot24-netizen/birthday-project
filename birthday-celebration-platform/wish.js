@@ -12,6 +12,8 @@ else{
     $("customMessage").textContent=d.message||"Wishing you a wonderful birthday!";
     $("ageLine").textContent=d.age!==null&&d.age!==undefined?`Celebrating ${d.age} wonderful years`:"";
     document.title=`Happy Birthday ${d.recipientName||""}`;
+    if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
+    if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
     if(d.photoUrl){$("recipientPhoto").src=d.photoUrl;$("recipientPhoto").classList.remove("hidden");$("photoFallback").classList.add("hidden");}
     else{$("recipientPhoto").classList.add("hidden");$("photoFallback").classList.remove("hidden");}
   },err=>showError("Unable to load this celebration. Please try again later."));
@@ -32,7 +34,7 @@ function startMusic(){
   let i=0;musicOn=true;
   const play=()=>{if(!musicOn)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type="sine";osc.frequency.value=notes[i%notes.length];gain.gain.setValueAtTime(.0001,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.07,audioCtx.currentTime+.03);gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.34);osc.connect(gain).connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+.36);i++;musicTimer=setTimeout(play,390);};play();
 }
-$("startBtn").onclick=async()=>{$("startOverlay").classList.add("hidden");startMusic();startFireworks();};
+$("startBtn").onclick=async()=>{$("startOverlay").classList.add("hidden");const uploadedAudio=$("birthdayAudio");if(uploadedAudio.src){try{await uploadedAudio.play();}catch(e){startMusic();}}else{startMusic();}startFireworks();};
 
 // Canvas fireworks
 const canvas=$("fireworks"),ctx=canvas.getContext("2d");let particles=[],raf=null;

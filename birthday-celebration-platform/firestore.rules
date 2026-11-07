@@ -1,16 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function ownsWish() {
-      return signedIn() && resource.data.ownerUid == request.auth.uid;
-    }
+    function signedIn() { return request.auth != null; }
+    function ownsWish() { return signedIn() && resource.data.ownerUid == request.auth.uid; }
 
     match /users/{userId} {
-      // Each signed-in Google account can read/create/update only its own profile.
       allow get: if signedIn() && request.auth.uid == userId;
       allow list: if false;
       allow create, update: if signedIn()
@@ -21,10 +15,9 @@ service cloud.firestore {
     }
 
     match /wishes/{wishId} {
-      // Anyone with the exact wish URL can view that birthday page.
+      // Public single-document reads are required for shareable birthday URLs.
       allow get: if true;
-      // The Admin dashboard query must include where(ownerUid == current UID).
-      allow list: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow list: if ownsWish();
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.slug == wishId
