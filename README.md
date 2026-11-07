@@ -1,78 +1,92 @@
-# Birthday Celebration & Admin Platform — Multi-user + GitHub Assets
+# জন্মদিন স্টুডিও — ব্যক্তিগত জন্মদিন উদযাপন প্ল্যাটফর্ম
 
-## Preserved platform features
-- Google popup authentication (any Google account can sign in).
-- Automatic private profile creation at `users/{uid}`.
-- Each account sees and manages only its own birthday projects.
-- Shareable live birthday pages, QR download, copy link, preview, edit and delete.
-- Cake/candle interaction, fireworks and original synthesized celebration tune.
-- Optional uploaded audio playback and public attachment link.
+## যা যা আছে
+- যেকোনো Google/Gmail অ্যাকাউন্ট দিয়ে নিরাপদ লগইন।
+- প্রথম লগইনে স্বয়ংক্রিয় ব্যক্তিগত প্রোফাইল তৈরি।
+- প্রত্যেক ব্যবহারকারী শুধু নিজের জন্মদিনের আয়োজন দেখতে, তৈরি, সম্পাদনা ও মুছতে পারবেন।
+- প্রতিটি আয়োজনের আলাদা শেয়ার লিংক, QR কোড, প্রিভিউ।
+- বাংলা নাম ও বাংলা শুভেচ্ছাবার্তা।
+- জন্মদিনের পাতায় কেক, মোমবাতি, আতশবাজি এবং "Happy Birthday to You" সুর।
+- ইচ্ছা করলে নিজস্ব অডিও ও অতিরিক্ত ফাইলের লিংক ব্যবহার।
+- ছবি, অডিও ও ফাইল GitHub রিপোজিটরির `Assets` ফোল্ডারে আপলোড।
 
-## Firebase project
-The supplied Firebase configuration is retained in `firebase-config.js` for project `birthday-wish-15e13`.
+## Firebase সেটআপ
+Firebase প্রজেক্ট: `birthday-wish-15e13`
 
-### Authentication
-1. Firebase Console → Authentication → Sign-in method → enable Google.
-2. Set a support email and add your hosting domain under Authorized domains.
+1. Firebase Console → Authentication → Sign-in method থেকে Google চালু করুন।
+2. Authentication → Settings → Authorized domains-এ `hkshahadot24-netizen.github.io` যোগ করুন।
+3. Firestore Database → Rules-এ এই ZIP-এর `firestore.rules` ফাইলের সম্পূর্ণ কোড Publish করুন।
+4. Realtime Database এই অ্যাপ ব্যবহার করে না; `database.rules.json` শুধু অপ্রয়োজনীয় RTDB অ্যাক্সেস বন্ধ রাখে।
 
-### Cloud Firestore Rules
-Publish the complete contents of `firestore.rules` in Firebase Console → Firestore Database → Rules.
-- Public visitors can read one exact wish document for a shared URL.
-- Signed-in users can list, create, update and delete only their own wishes.
-- User profiles are private and each user can access only their own profile.
+### ব্যক্তিগত ডেটা সুরক্ষা
+- `users/{uid}` প্রোফাইল শুধু সংশ্লিষ্ট ব্যবহারকারী পড়তে/লিখতে পারবেন।
+- `wishes`-এ প্রতিটি নতুন ডকুমেন্টে `ownerUid` থাকে।
+- লগইন করা ব্যবহারকারী শুধু নিজের `ownerUid`-এর আয়োজন তালিকাভুক্ত/পরিবর্তন/মুছতে পারবেন।
+- শেয়ার লিংকের জন্য নির্দিষ্ট একটি `wishes/{id}` ডকুমেন্ট পাবলিকভাবে পড়া যায়। তাই সেখানে গোপন তথ্য লিখবেন না।
 
-### Realtime Database Rules
-The current application does not use Firebase Realtime Database. To avoid accidentally exposing an unused database, publish `database.rules.json` in Realtime Database → Rules. It denies all reads and writes. If RTDB is added later, define a dedicated data schema and least-privilege rules first.
+## GitHub Assets আপলোড — Cloudflare Worker
 
-## GitHub Assets upload via Cloudflare Worker
-Target repository: `hkshahadot24-netizen/birthday-project` (branch `main`). Uploaded assets are placed under:
-- `Assets/Images/{firebase-uid}/...`
-- `Assets/Audio/{firebase-uid}/...`
-- `Assets/Files/{firebase-uid}/...`
+### নির্ধারিত ঠিকানা
+- Worker: `https://birthday-assets-uploader.hkshahadot24.workers.dev`
+- Upload API: `https://birthday-assets-uploader.hkshahadot24.workers.dev/upload`
+- GitHub repository: `hkshahadot24-netizen/birthday-project`
+- Branch: `main`
+- Firebase project: `birthday-wish-15e13`
 
-The browser sends the current Firebase ID token to the Worker. The Worker verifies the token signature and Firebase project claims before accepting the upload. The GitHub token is never sent to the browser; store it as a Cloudflare Worker Secret named `GITHUB_TOKEN`.
+`upload-config.js`-এ Worker URL আগে থেকেই সেট করা আছে।
 
-### Deploy the Worker (Cloudflare Dashboard — no local tooling required)
-1. Open Cloudflare Dashboard → Workers & Pages → Create → Worker.
-2. Name it `birthday-assets-uploader` and deploy a starter Worker.
-3. Open the Worker → Edit code. Copy all code from `cloudflare-worker/src/index.js` in this project and replace the starter code. Save and Deploy.
-4. Open Worker → Settings → Variables and Secrets → Add a Secret:
-   - Name: `GITHUB_TOKEN`
-   - Value: a GitHub fine-grained personal access token.
-5. The GitHub token must be limited to repository `birthday-project` and have **Contents: Read and write** permission. Do not place it in this project or commit it.
-6. In Worker Settings → Variables, add these values if they are not already in `wrangler.toml`:
-   - `GITHUB_OWNER` = `hkshahadot24-netizen`
-   - `GITHUB_REPO` = `birthday-project`
-   - `GITHUB_BRANCH` = `main`
-   - `FIREBASE_PROJECT_ID` = `birthday-wish-15e13`
-   - `ALLOWED_ORIGINS` = `https://hkshahadot24-netizen.github.io,http://localhost:8000,http://127.0.0.1:8000`
-7. Save and deploy. Copy the Worker URL, e.g. `https://birthday-assets-uploader.<your-subdomain>.workers.dev`.
-8. The deployed Worker URL is already filled in `upload-config.js` as `https://birthday-assets-uploader.hkshahadot24.workers.dev` (without `/upload`). If you ever rename the Worker, update that value and commit the file to GitHub Pages.
+### Cloudflare-এ যা যাচাই করবেন
+Cloudflare Dashboard → Workers & Pages → `birthday-assets-uploader` → Settings → Variables and Secrets:
 
-### Upload behavior
-- Image files → `Assets/Images/` and their URL is inserted into the Photo URL field.
-- Audio files → `Assets/Audio/` and their URL is inserted into the Audio URL field. Public wish pages play uploaded audio after the visitor taps Start.
-- Supported other files → `Assets/Files/` and their URL is inserted into Attachment URL. Public wish pages show an attachment link.
-- Maximum upload size: 8 MB per file.
-- Allowed types: Common image/audio formats; PDF, TXT, CSV, ZIP, DOC/DOCX, XLS/XLSX, PPT/PPTX, MP4, MOV and WEBM, plus other non-executable file types with a safe extension. Executable/script/HTML/SVG types are blocked for public-hosting safety.
-- Uploads are attributed to the authenticated Firebase UID. GitHub repository branch must be `main`; change `GITHUB_BRANCH` in Worker settings if your default branch differs.
+**Variables**
+- `GITHUB_OWNER` = `hkshahadot24-netizen`
+- `GITHUB_REPO` = `birthday-project`
+- `GITHUB_BRANCH` = `main`
+- `FIREBASE_PROJECT_ID` = `birthday-wish-15e13`
+- `ALLOWED_ORIGINS` = `https://hkshahadot24-netizen.github.io,http://localhost:8000,http://127.0.0.1:8000`
 
-## Local test
-Serve the site using a local HTTP server (ES modules do not run from `file://`):
+**Secret**
+- `GITHUB_TOKEN` = আপনার GitHub Fine-grained Personal Access Token
+
+GitHub Token-এর জন্য:
+1. Repository access-এ শুধু `birthday-project` নির্বাচন করুন।
+2. Repository permissions → Contents → **Read and write** দিন।
+3. Token-টি Cloudflare Worker-এর Secret হিসেবে যোগ করুন। HTML/JS ফাইলে বা GitHub repository-তে Token রাখবেন না।
+
+### Worker কোড আপডেট
+এই ZIP-এর `cloudflare-worker/src/index.js` ফাইলের সম্পূর্ণ কোড কপি করুন।
+Cloudflare Dashboard → Workers & Pages → `birthday-assets-uploader` → Edit code-এ পুরোনো কোড সম্পূর্ণ বদলে নতুন কোড Paste করে **Deploy** করুন।
+Dashboard-এর Variables/Secret মুছবেন না; শুধু কোড Deploy করুন।
+
+### আপলোডের গন্তব্য
+- ছবি: `Assets/Images/{Firebase-UID}/`
+- অডিও: `Assets/Audio/{Firebase-UID}/`
+- অন্যান্য ফাইল: `Assets/Files/{Firebase-UID}/`
+
+সর্বোচ্চ ফাইল সাইজ ৮ MB। সফল আপলোড হলে ফাইলের URL স্বয়ংক্রিয়ভাবে সংশ্লিষ্ট Photo / Audio / Attachment ঘরে বসবে। এরপর জন্মদিনের আয়োজনটি Save করতে হবে।
+
+### আপলোড ব্যর্থ হলে
+নতুন Worker কোড Deploy করার পর অ্যাপ থেকে আবার আপলোড করুন। ত্রুটির বার্তায় HTTP Status দেখাবে:
+- **401**: লগইন টোকেন অনুপস্থিত/মেয়াদোত্তীর্ণ — আবার Google Login করুন।
+- **403 / Origin**: `ALLOWED_ORIGINS`-এ সাইটের ঠিকানা হুবহু যোগ করুন। URL-এ শেষে `/` দেবেন না।
+- **502 / GitHub 401**: `GITHUB_TOKEN` ভুল বা মেয়াদোত্তীর্ণ।
+- **502 / GitHub 403**: Token-এ `birthday-project` রিপোজিটরির Contents: Read and write অনুমতি নেই অথবা rate limit।
+- **502 / GitHub 404**: Owner, Repository বা Branch-এর নাম ভুল।
+- **413**: ফাইল ৮ MB-এর বেশি।
+- **415**: ফাইলের ধরন অনুমোদিত নয়।
+
+## GitHub Pages
+রিপোজিটরির `birthday-project`-এর `main` branch-এ এই ZIP-এর ভেতরের ফাইলগুলো আপলোড করুন। `index.html` অবশ্যই repository root-এ থাকতে হবে; `birthday-celebration-platform/` নামে অতিরিক্ত সাবফোল্ডারের ভেতরে থাকলে root URL-এ 404 দেখাতে পারে।
+
+প্রকাশিত সাইট:
+`https://hkshahadot24-netizen.github.io/birthday-project/`
+
+## লোকাল টেস্ট
+এই ফোল্ডারে টার্মিনাল খুলে চালান:
 ```bash
 python -m http.server 8000
 ```
-Open `http://localhost:8000/admin.html`. For local upload testing, `http://localhost:8000` is already included in the Worker CORS allowlist.
+তারপর `http://localhost:8000/` খুলুন।
 
-## Important
-- GitHub Pages deployment can take a short time after an asset commit. The Worker returns the raw GitHub URL, which can be used immediately after GitHub accepts the file.
-- The repository must allow the token to write contents. A fine-grained token with access only to this repository is recommended.
-- Never expose `GITHUB_TOKEN`, Firebase service-account JSON, or other server credentials in frontend files.
-- Existing wishes created before multi-user ownership was added may lack `ownerUid`; migrate those documents using a trusted admin process if they should appear in a user's workspace.
-- The public wish viewer intentionally allows direct reads by document ID. Do not store private information in wish documents.
-
-
-## Latest compatibility fix
-The root `index.html` and `admin.html` now both include the signed-in Google profile elements
-(`profileName`, `profileEmail`, and `profilePhoto`) required by the workspace renderer.
-The profile renderer also checks that these elements exist before updating them.
+## পুরোনো ডেটা
+মাল্টি-ইউজার ব্যবস্থা চালুর আগে তৈরি পুরোনো wish ডকুমেন্টে `ownerUid` না থাকলে সেগুলো ব্যক্তিগত তালিকায় আসবে না। সঠিক মালিকানা যাচাই করে Trusted Admin প্রক্রিয়ায় `ownerUid` যোগ না করা পর্যন্ত সেগুলো পরিবর্তনযোগ্য নয়।

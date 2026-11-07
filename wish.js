@@ -3,39 +3,57 @@ import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasej
 import { firebaseConfig } from "./firebase-config.js";
 const app=initializeApp(firebaseConfig),db=getFirestore(app),$=id=>document.getElementById(id);
 const id=new URLSearchParams(location.search).get("id");
-function showError(msg){$("recipientName").textContent="Celebration not found";$("customMessage").textContent=msg;$("ageLine").textContent="";document.title="Birthday page not found";}
-if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(id)){showError("This birthday link is invalid. Please check the shared URL.");}
+function showError(msg){$("recipientName").textContent="আয়োজনটি পাওয়া যায়নি";$("customMessage").textContent=msg;$("ageLine").textContent="";document.title="Birthday page not found";}
+if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(id)){showError("জন্মদিনের লিংকটি সঠিক নয়। অনুগ্রহ করে লিংকটি পরীক্ষা করুন।");}
 else{
   onSnapshot(doc(db,"wishes",id),snap=>{
-    if(!snap.exists()){showError("This birthday page may have been removed or the link is incorrect.");return;}
+    if(!snap.exists()){showError("জন্মদিনের পাতাটি মুছে ফেলা হয়েছে অথবা লিংকটি ভুল।");return;}
     const d=snap.data();$("recipientName").textContent=d.recipientName||"You";
     $("customMessage").textContent=d.message||"Wishing you a wonderful birthday!";
-    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`Celebrating ${d.age} wonderful years`:"";
+    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} বছর পূর্তির আনন্দ উদযাপন`:"";
     document.title=`Happy Birthday ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
     if(d.photoUrl){$("recipientPhoto").src=d.photoUrl;$("recipientPhoto").classList.remove("hidden");$("photoFallback").classList.add("hidden");}
     else{$("recipientPhoto").classList.add("hidden");$("photoFallback").classList.remove("hidden");}
-  },err=>showError("Unable to load this celebration. Please try again later."));
+  },err=>showError("জন্মদিনের আয়োজনটি লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।"));
 }
 
 // Candles: tap individually; blow button turns all flames off.
 function extinguish(c){c.classList.add("out");}
-document.querySelectorAll(".candle").forEach(c=>c.addEventListener("click",()=>{extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="Your wish is on its way! 🎉";}));
-function blowAll(){document.querySelectorAll(".candle").forEach(extinguish);$("cakeMessage").textContent="Make that wish come true! ✨";}
-$("blowBtn").onclick=blowAll;$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=[...document.querySelectorAll(".candle")].find(x=>!x.classList.contains("out"));if(c)extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="Happy birthday! 🎊";};
-$("relightBtn").onclick=()=>{document.querySelectorAll(".candle").forEach(c=>c.classList.remove("out"));$("cakeMessage").textContent="Candles are glowing again!";};
+document.querySelectorAll(".candle").forEach(c=>c.addEventListener("click",()=>{extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক! 🎉";}));
+function blowAll(){document.querySelectorAll(".candle").forEach(extinguish);$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক! ✨";}
+$("blowBtn").onclick=blowAll;$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=[...document.querySelectorAll(".candle")].find(x=>!x.classList.contains("out"));if(c)extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="শুভ জন্মদিন! 🎊";};
+$("relightBtn").onclick=()=>{document.querySelectorAll(".candle").forEach(c=>c.classList.remove("out"));$("cakeMessage").textContent="মোমবাতিগুলো আবার জ্বলে উঠেছে!";};
 
-// Original synthesized celebratory melody using Web Audio; no external copyrighted audio.
+// "Happy Birthday to You" সুরটি Web Audio দিয়ে তৈরি; বাইরের অডিও ফাইল লাগে না।
 let audioCtx=null,musicTimer=null,musicOn=false;
 function startMusic(){
   const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return;
-  audioCtx=new AudioContext();const notes=[523.25,659.25,783.99,659.25,587.33,698.46,880,698.46,523.25,659.25,783.99,1046.5];
+  if(audioCtx){audioCtx.close().catch(()=>{});}
+  audioCtx=new AudioContext();
+  // মূল পরিচিত সুর: G G A G C B / G G A G D C / G G G E C B A / F F E C D C
+  const beat=0.34;
+  const melody=[
+    [392,1],[392,1],[440,2],[392,2],[523.25,2],[493.88,3],
+    [392,1],[392,1],[440,2],[392,2],[587.33,2],[523.25,3],
+    [392,1],[392,1],[783.99,2],[659.25,2],[523.25,2],[493.88,2],[440,3],
+    [698.46,1],[698.46,1],[659.25,2],[523.25,2],[587.33,2],[523.25,4]
+  ];
   let i=0;musicOn=true;
-  const play=()=>{if(!musicOn)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type="sine";osc.frequency.value=notes[i%notes.length];gain.gain.setValueAtTime(.0001,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.07,audioCtx.currentTime+.03);gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.34);osc.connect(gain).connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+.36);i++;musicTimer=setTimeout(play,390);};play();
+  const play=()=>{
+    if(!musicOn||!audioCtx)return;
+    const [hz,beats]=melody[i];
+    const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.type="triangle";osc.frequency.setValueAtTime(hz,now);
+    gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.025);
+    gain.gain.setValueAtTime(.12,now+beat*beats*.78);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+beat*beats*.92);
+    osc.connect(gain).connect(audioCtx.destination);osc.start(now);osc.stop(now+beat*beats);
+    i=(i+1)%melody.length;musicTimer=setTimeout(play,beat*beats*1000);
+  };
+  audioCtx.resume().then(play).catch(()=>{});
 }
-$("startBtn").onclick=async()=>{$("startOverlay").classList.add("hidden");const uploadedAudio=$("birthdayAudio");if(uploadedAudio.src){try{await uploadedAudio.play();}catch(e){startMusic();}}else{startMusic();}startFireworks();};
-
 // Canvas fireworks
 const canvas=$("fireworks"),ctx=canvas.getContext("2d");let particles=[],raf=null;
 function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);}
