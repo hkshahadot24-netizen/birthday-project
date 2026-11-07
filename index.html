@@ -1,103 +1,35 @@
 <!doctype html>
-<html lang="bn">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>শুভেচ্ছা স্টুডিও — ব্যক্তিগত ড্যাশবোর্ড</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    body{background:radial-gradient(circle at 10% 0%,#312e81 0,transparent 35%),#090d1c;color:#eef2ff}
-    .glass{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(18px)}
-    input,textarea,select{color:#111827!important;background:#fff!important}input::placeholder,textarea::placeholder{color:#64748b!important;opacity:1}input,textarea{font-size:16px}.btn{border-radius:12px;padding:10px 14px;font-weight:700}
-  </style>
-</head>
-<body class="min-h-screen">
-  <header class="max-w-7xl mx-auto px-5 py-6 flex items-center justify-between">
-    <div><p class="text-pink-300 text-xs uppercase tracking-[.3em]">সকল উপলক্ষের শুভেচ্ছা প্ল্যাটফর্ম</p><h1 class="text-2xl font-black">💌 শুভেচ্ছা স্টুডিও</h1></div>
-    <button id="logoutBtn" class="hidden btn bg-white/10 hover:bg-white/20">লগ আউট</button>
-  </header>
-  <main class="max-w-7xl mx-auto px-5 pb-12">
-    <section id="loginPanel" class="glass rounded-3xl p-6 max-w-md mx-auto mt-12">
-      <h2 class="text-2xl font-bold mb-2">আপনার অ্যাকাউন্টে প্রবেশ করুন</h2>
-      <p class="text-slate-300 text-sm mb-6">আপনার Google / Gmail অ্যাকাউন্ট দিয়ে নিরাপদে প্রবেশ করুন।</p>
-      <button id="googleLoginBtn" class="btn w-full bg-white text-slate-900 hover:bg-slate-100 flex items-center justify-center gap-3">
-        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.97 46.98 31.88 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Google দিয়ে প্রবেশ করুন
-      </button>
-      <p id="loginError" class="text-rose-300 text-sm mt-4" role="alert"></p>
-      <p class="text-xs text-slate-400 mt-4">প্রতিটি Google অ্যাকাউন্টের জন্য আলাদা ব্যক্তিগত জায়গা রয়েছে। এখানে আপনি নিজের জন্মদিনের শুভেচ্ছা তৈরি ও পরিচালনা করতে পারবেন।</p>
-    </section>
-    <section id="appPanel" class="hidden space-y-7">
-      <div class="flex flex-wrap items-end justify-between gap-3"><div><p class="text-cyan-300 text-xs uppercase tracking-widest">ব্যক্তিগত ড্যাশবোর্ড</p><h2 class="text-3xl font-black">আমার শুভেচ্ছার আয়োজন</h2></div><span id="projectCount" class="text-slate-300 text-sm">০টি আয়োজন</span></div>
-
-      <section id="profileCard" class="glass rounded-2xl p-4 flex items-center gap-4">
-        <img id="profilePhoto" src="https://ui-avatars.com/api/?name=User&background=312e81&color=fff"
-             alt="Google profile photo" class="w-14 h-14 rounded-full object-cover border border-white/20">
-        <div class="min-w-0">
-          <p class="text-xs text-cyan-300 uppercase tracking-widest">বর্তমানে লগইন করা অ্যাকাউন্ট</p>
-          <p id="profileName" class="font-bold truncate">Google ব্যবহারকারী</p>
-          <p id="profileEmail" class="text-sm text-slate-300 truncate"></p>
-        </div>
-      </section>
-
-      <div class="grid lg:grid-cols-[.85fr_1.15fr] gap-6">
-        <form id="wishForm" class="glass rounded-3xl p-6 space-y-4">
-          <div class="flex items-center justify-between"><h3 id="formTitle" class="text-xl font-bold">নতুন শুভেচ্ছা তৈরি করুন</h3><button type="button" id="resetBtn" class="text-sm text-cyan-300">ফর্ম পরিষ্কার করুন</button></div>
-          <input id="eventName" required maxlength="100" placeholder="শুভেচ্ছার নাম (যেমন: ঈদ মোবারক / শুভ জন্মদিন)" class="w-full rounded-xl p-3">
-          <input id="recipientName" required maxlength="80" placeholder="যাঁকে শুভেচ্ছা জানাবেন, তাঁর নাম" class="w-full rounded-xl p-3">
-          <div class="grid grid-cols-2 gap-3"><input id="age" type="number" min="0" max="150" placeholder="বয়স" class="w-full rounded-xl p-3"><input id="birthDate" type="date" aria-label="জন্মতারিখ" class="w-full rounded-xl p-3"></div>
-          <label class="block text-sm font-bold text-cyan-200">রিসিভার পেইজের লেখা ও কনটেন্ট</label>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <input id="topLabel" maxlength="160" placeholder="উপরের ছোট শিরোনাম" class="w-full rounded-xl p-3">
-            <input id="greetingTitle" maxlength="120" placeholder="মূল শুভেচ্ছার শিরোনাম" class="w-full rounded-xl p-3">
-            <input id="overlayTitle" maxlength="160" placeholder="চমকের শুরুর শিরোনাম" class="w-full rounded-xl p-3">
-            <input id="startButtonText" maxlength="100" placeholder="শুরু করার বাটনের লেখা" class="w-full rounded-xl p-3">
-          </div>
-          <textarea id="overlayMessage" maxlength="500" rows="2" placeholder="শুরুর পর্দার বর্ণনা" class="w-full rounded-xl p-3"></textarea>
-          <input id="overlayNote" maxlength="200" placeholder="শুরুর পর্দার নিচের ছোট লেখা" class="w-full rounded-xl p-3">
-          <textarea id="message" required maxlength="5000" rows="5" placeholder="মূল শুভেচ্ছাবার্তা / বিস্তারিত লেখা" class="w-full rounded-xl p-3"></textarea>
-          <input id="ageText" maxlength="120" placeholder="বয়সের পরের লেখা (যেমন: বছর পূর্তির আনন্দ উদযাপন)" class="w-full rounded-xl p-3">
-          <div class="grid sm:grid-cols-2 gap-3">
-            <input id="attachmentLabel" maxlength="100" placeholder="সংযুক্ত ফাইলের বাটনের লেখা" class="w-full rounded-xl p-3">
-            <input id="cakeTitle" maxlength="160" placeholder="কেক/বিশেষ অংশের শিরোনাম" class="w-full rounded-xl p-3">
-          </div>
-          <textarea id="cakeInstruction" maxlength="300" rows="2" placeholder="কেকের নিচের নির্দেশনা" class="w-full rounded-xl p-3"></textarea>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <input id="blowButtonText" maxlength="100" placeholder="প্রথম বাটনের লেখা" class="w-full rounded-xl p-3">
-            <input id="relightButtonText" maxlength="100" placeholder="দ্বিতীয় বাটনের লেখা" class="w-full rounded-xl p-3">
-          </div>
-          <input id="cakeMessageText" maxlength="200" placeholder="কেকের নিচের বার্তা" class="w-full rounded-xl p-3">
-          <input id="footerText" maxlength="200" placeholder="পেইজের একদম নিচের লেখা" class="w-full rounded-xl p-3">
-          <label class="block text-sm font-bold text-cyan-200">ছবি, গান ও সংযুক্তি</label>
-          <input id="photoUrl" type="url" placeholder="ছবির লিংক (https://...)" class="w-full rounded-xl p-3">
-          <input id="audioUrl" type="url" placeholder="গানের লিংক (ঐচ্ছিক)" class="w-full rounded-xl p-3">
-          <input id="attachmentUrl" type="url" placeholder="অতিরিক্ত ফাইলের লিংক (ঐচ্ছিক)" class="w-full rounded-xl p-3">
-          <div class="rounded-2xl border border-white/15 bg-black/20 p-4 space-y-3">
-            <div><h4 class="font-bold">GitHub-এ ছবি, গান ও ফাইল আপলোড</h4><p class="text-xs text-slate-300 mt-1">ছবি, গান ও ফাইল আপনার GitHub রিপোজিটরির Assets ফোল্ডারে সংরক্ষিত হবে। প্রতিটি ফাইল সর্বোচ্চ ৮ MB হতে পারবে।</p></div>
-            <label for="assetFile" class="block text-sm font-semibold text-slate-100">আপনার ছবি / গান / ফাইল নির্বাচন করুন</label><input id="assetFile" type="file" accept="image/*,audio/*,.pdf,.txt,.csv,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mov,.webm" class="w-full rounded-xl bg-white p-2 text-slate-900">
-            <button type="button" id="uploadAssetBtn" class="btn w-full bg-cyan-500/20 text-cyan-100 border border-cyan-300/30">⬆️ নির্বাচিত ফাইল GitHub-এ আপলোড করুন</button>
-            <p id="uploadStatus" class="text-xs text-slate-300" role="status">Cloudflare আপলোড সার্ভার প্রস্তুত থাকলে এখানে আপলোডের অবস্থা দেখাবে।</p>
-          </div>
-          <input id="slug" maxlength="70" pattern="[a-z0-9-]+" placeholder="শেয়ার লিংক আইডি (স্বয়ংক্রিয়ভাবে তৈরি হবে)" class="w-full rounded-xl p-3">
-          <p class="text-xs text-slate-400">আইডিতে ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও হাইফেন ব্যবহার হবে। সংরক্ষণের আগে চাইলে পরিবর্তন করতে পারবেন।</p>
-          <button id="saveBtn" class="btn w-full bg-gradient-to-r from-fuchsia-500 to-indigo-500 text-white">✨ জন্মদিনের পাতা তৈরি করুন</button>
-          <p id="formStatus" class="text-sm" role="status"></p>
-        </form>
-        <div class="glass rounded-3xl p-6">
-          <h3 class="text-xl font-bold mb-4">আমার তৈরি সব আয়োজন</h3>
-          <div class="overflow-x-auto"><table class="w-full text-left text-sm min-w-[650px]">
-            <thead class="text-slate-400 border-b border-white/10"><tr><th class="py-3">শুভেচ্ছার নাম</th><th>রিসিভার</th><th>শেয়ার আইডি</th><th>করণীয়</th></tr></thead>
-            <tbody id="wishRows"><tr><td colspan="4" class="py-8 text-center text-slate-400">আপনার আয়োজন দেখতে Google দিয়ে প্রবেশ করুন।</td></tr></tbody>
-          </table></div>
-          <p class="text-xs text-slate-400 mt-4">শেয়ার লিংকের মাধ্যমে সবাই শুভেচ্ছার পাতা দেখতে পারবেন। প্রত্যেক অ্যাকাউন্ট শুধু নিজের আয়োজন পরিচালনা করতে পারবে।</p>
-        </div>
-      </div>
-    </section>
-  </main>
-  <dialog id="qrDialog" class="rounded-3xl p-6 text-slate-900 backdrop:bg-black/70">
-    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">শেয়ার করার QR কোড</h3><button id="closeQr" class="text-2xl" aria-label="Close">×</button></div>
-    <div id="qrCanvas" class="p-3 bg-white inline-block rounded-xl"></div><p id="qrUrl" class="text-xs break-all mt-3 max-w-xs"></p>
-    <button id="downloadQr" class="btn bg-indigo-600 text-white w-full mt-4">QR কোড ডাউনলোড করুন</button>
-  </dialog>
-  <script type="module" src="./admin.js"></script>
-</body></html>
+<html lang="bn"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020"><title>জন্মদিন স্টুডিও</title>
+<script src="https://cdn.tailwindcss.com"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0%,#27366e 0,transparent 34%),#0b1020;color:#eef2ff;font-family:"Noto Sans Bengali","Hind Siliguri",system-ui,sans-serif}
+.glass{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.11);backdrop-filter:blur(16px)}
+input,textarea{width:100%;min-width:0;background:#fff!important;color:#111827!important;border:1px solid #dbe2ea!important;border-radius:13px;padding:13px 14px;font-size:16px;outline:none}
+input:focus,textarea:focus{border-color:#818cf8!important;box-shadow:0 0 0 3px #818cf833}input::placeholder,textarea::placeholder{color:#64748b!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:13px;padding:12px 16px;font-weight:700;min-height:46px;transition:.18s}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.55;cursor:wait}
+.field-label{display:block;font-size:13px;font-weight:700;color:#c7d2fe;margin:0 0 7px}.field{min-width:0}.section-title{font-size:15px;font-weight:800;color:#e0e7ff}
+@media(max-width:640px){.page-wrap{padding-left:14px;padding-right:14px}.mobile-stack{display:flex;flex-direction:column}.mobile-full{width:100%}#wishRows tr{display:block} }
+</style></head><body class="min-h-screen">
+<header class="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-3"><div><p class="text-pink-300 text-[11px] tracking-[.22em] font-bold">BIRTHDAY CELEBRATION</p><h1 class="text-xl sm:text-2xl font-black mt-1">🎂 জন্মদিন স্টুডিও</h1></div><button id="logoutBtn" class="hidden btn bg-white/10 text-sm">লগ আউট</button></header>
+<main class="page-wrap max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+<section id="loginPanel" class="glass rounded-3xl p-6 sm:p-8 max-w-md mx-auto mt-8 sm:mt-14"><div class="text-4xl mb-3">🎁</div><h2 class="text-2xl font-black mb-2">আপনার ড্যাশবোর্ডে প্রবেশ করুন</h2><p class="text-slate-300 text-sm mb-6">Google অ্যাকাউন্ট দিয়ে প্রবেশ করে জন্মদিনের শুভেচ্ছা তৈরি করুন।</p><button id="googleLoginBtn" class="btn w-full bg-white text-slate-900 hover:bg-slate-100"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.97 46.98 31.88 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google দিয়ে প্রবেশ করুন</button><p id="loginError" class="text-rose-300 text-sm mt-4" role="alert"></p></section>
+<section id="appPanel" class="hidden space-y-5 sm:space-y-6">
+<div class="flex flex-wrap items-end justify-between gap-3"><div><p class="text-cyan-300 text-xs font-bold tracking-widest">PERSONAL DASHBOARD</p><h2 class="text-2xl sm:text-3xl font-black mt-1">আমার জন্মদিনের আয়োজন</h2></div><span id="projectCount" class="rounded-full bg-white/10 px-3 py-2 text-xs text-slate-200">০টি আয়োজন</span></div>
+<section id="profileCard" class="glass rounded-2xl p-3 sm:p-4 flex items-center gap-3"><img id="profilePhoto" src="https://ui-avatars.com/api/?name=User&background=312e81&color=fff" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-white/20"><div class="min-w-0"><p class="text-[11px] text-cyan-300">লগইন করা অ্যাকাউন্ট</p><p id="profileName" class="font-bold truncate">Google ব্যবহারকারী</p><p id="profileEmail" class="text-xs text-slate-300 truncate"></p></div></section>
+<div class="grid lg:grid-cols-[.88fr_1.12fr] gap-5 sm:gap-6 items-start">
+<form id="wishForm" class="glass rounded-3xl p-4 sm:p-6 space-y-4">
+<div class="flex items-center justify-between gap-2"><div><p class="text-pink-300 text-xs font-bold">🎂 BIRTHDAY WISH</p><h3 id="formTitle" class="text-xl font-black mt-1">নতুন শুভেচ্ছা তৈরি করুন</h3></div><button type="button" id="resetBtn" class="text-xs text-cyan-300 font-bold whitespace-nowrap">রিসেট</button></div>
+<div class="field"><label class="field-label" for="recipientName">যাঁর জন্মদিন, তাঁর নাম *</label><input id="recipientName" required maxlength="80" placeholder="নাম লিখুন"></div>
+<div class="grid grid-cols-2 gap-3"><div class="field"><label class="field-label" for="age">বয়স (ঐচ্ছিক)</label><input id="age" type="number" min="0" max="150" placeholder="বয়স"></div><div class="field"><label class="field-label" for="birthDate">জন্মতারিখ (ঐচ্ছিক)</label><input id="birthDate" type="date"></div></div>
+<div class="field"><label class="field-label" for="message">জন্মদিনের শুভেচ্ছাবার্তা *</label><textarea id="message" required maxlength="1500" rows="4" placeholder="আপনার মনের কথা লিখুন..."></textarea></div>
+<div class="space-y-3"><p class="section-title">ছবি, গান ও সংযুক্তি</p><div class="field"><label class="field-label" for="photoUrl">ছবির লিংক (ঐচ্ছিক)</label><input id="photoUrl" type="url" placeholder="https://..."></div><div class="field"><label class="field-label" for="audioUrl">গানের লিংক (ঐচ্ছিক)</label><input id="audioUrl" type="url" placeholder="https://..."></div><div class="field"><label class="field-label" for="attachmentUrl">অতিরিক্ত ফাইলের লিংক (ঐচ্ছিক)</label><input id="attachmentUrl" type="url" placeholder="https://..."></div></div>
+<div class="rounded-2xl border border-white/10 bg-black/15 p-3 sm:p-4 space-y-3"><div><p class="font-bold text-sm">ফাইল আপলোড</p><p class="text-xs text-slate-400 mt-1">ছবি, গান অথবা ফাইল নির্বাচন করুন (সর্বোচ্চ ৮ MB)।</p></div><input id="assetFile" type="file" accept="image/*,audio/*,.pdf,.txt,.csv,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mov,.webm" class="!p-2 !text-sm"><button type="button" id="uploadAssetBtn" class="btn w-full bg-cyan-500/15 text-cyan-100 border border-cyan-300/20">⬆️ ফাইল আপলোড করুন</button><p id="uploadStatus" class="text-xs text-slate-300 break-words" role="status"></p></div>
+<details class="rounded-xl border border-white/10 p-3"><summary class="text-sm font-semibold text-slate-300 cursor-pointer">শেয়ার লিংক আইডি (ঐচ্ছিক)</summary><input id="slug" maxlength="70" pattern="[a-z0-9-]+" placeholder="স্বয়ংক্রিয়ভাবে তৈরি হবে" class="mt-3"><p class="text-[11px] text-slate-400 mt-2">ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও হাইফেন ব্যবহার করুন।</p></details>
+<button id="saveBtn" class="btn w-full bg-gradient-to-r from-fuchsia-500 to-indigo-500 text-white">✨ জন্মদিনের পাতা তৈরি করুন</button><p id="formStatus" class="text-sm" role="status"></p>
+</form>
+<section class="glass rounded-3xl p-4 sm:p-6"><div class="flex items-center justify-between gap-2 mb-4"><div><p class="text-cyan-300 text-xs font-bold">YOUR CREATIONS</p><h3 class="text-xl font-black mt-1">আমার তৈরি পাতা</h3></div><span class="text-2xl">🎉</span></div><div id="wishRows" class="space-y-3"><div class="text-center text-slate-400 py-8 text-sm">আপনার আয়োজন দেখতে Google দিয়ে প্রবেশ করুন।</div></div><p class="text-xs text-slate-400 mt-4">প্রতিটি আয়োজনের লিংক কপি করে সহজেই বন্ধু ও পরিবারের সঙ্গে শেয়ার করুন।</p></section>
+</div></section></main>
+<dialog id="qrDialog" class="rounded-3xl p-5 text-slate-900 backdrop:bg-black/70 w-[min(90vw,340px)]"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">শেয়ার করার QR কোড</h3><button id="closeQr" class="text-2xl">×</button></div><div id="qrCanvas" class="p-3 bg-white inline-block rounded-xl"></div><p id="qrUrl" class="text-xs break-all mt-3"></p><button id="downloadQr" class="btn bg-indigo-600 text-white w-full mt-4">QR কোড ডাউনলোড</button></dialog>
+<script type="module" src="./admin.js"></script></body></html>

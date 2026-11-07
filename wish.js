@@ -10,11 +10,11 @@ else{
     if(!snap.exists()){showError("জন্মদিনের পাতাটি মুছে ফেলা হয়েছে অথবা লিংকটি ভুল।");return;}
     const d=snap.data();
     const textDefaults={topLabel:"বিশেষ একটি দিন • বিশেষ একজন মানুষ",greetingTitle:"শুভ জন্মদিন",overlayTitle:"একটি সুন্দর চমক অপেক্ষা করছে!",overlayMessage:"নিচের বোতামে চাপ দিয়ে আয়োজন, গান ও আতশবাজি শুরু করুন।",startButtonText:"🎉 উদযাপন শুরু করুন",overlayNote:"আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।",ageText:"বছর পূর্তির আনন্দ উদযাপন",attachmentLabel:"📎 সংযুক্ত ফাইল খুলুন",cakeTitle:"মনের ইচ্ছা পূরণের কামনা করুন ✨",cakeInstruction:"প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।",blowButtonText:"🌬️ সব মোমবাতি নিভিয়ে দিন",relightButtonText:"🕯️ আবার জ্বালান",cakeMessageText:"মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!",footerText:"ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য"};
-    Object.entries(textDefaults).forEach(([key,fallback])=>{const el=$(key);if(el)el.textContent=d[key]||fallback;});
+    // রিসিভার পেইজটি স্থায়ীভাবে জন্মদিনের থিমে থাকবে; ড্যাশবোর্ডে অতিরিক্ত কনটেন্ট কাস্টমাইজেশন নেই।
     $("recipientName").textContent=d.recipientName||"আপনাকে!";
     $("customMessage").textContent=d.message||"আপনার দিনটি ভালোবাসা, হাসি ও সুন্দর স্মৃতিতে ভরে উঠুক।";
-    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} ${d.ageText||textDefaults.ageText}`:"";
-    document.title=`${d.eventName||"শুভেচ্ছা"} — ${d.recipientName||""}`;
+    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} ${textDefaults.ageText}`:"";
+    document.title=`শুভ জন্মদিন — ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
     if(d.photoUrl){$("recipientPhoto").src=d.photoUrl;$("recipientPhoto").classList.remove("hidden");$("photoFallback").classList.add("hidden");}
