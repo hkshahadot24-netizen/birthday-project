@@ -75,15 +75,15 @@ function renderProfile(user){
 
 $("recipientName").addEventListener("input",()=>{if(!editingId&&!$("slug").dataset.manual)$("slug").value=slugify($("recipientName").value);});
 $("slug").addEventListener("input",()=>{$("slug").dataset.manual="1";});
-$("resetBtn").onclick=()=>{form.reset();editingId=null;$("slug").dataset.manual="";$("saveBtn").textContent="✨ জন্মদিনের পাতা তৈরি করুন";$("formStatus").textContent="";};
+$("resetBtn").onclick=()=>{form.reset();editingId=null;$("slug").dataset.manual="";$("saveBtn").textContent="✨ শুভেচ্ছার পাতা তৈরি করুন";$("formTitle").textContent="নতুন শুভেচ্ছা তৈরি করুন";$("formStatus").textContent="";};
 
 form.addEventListener("submit",async e=>{
   e.preventDefault();const user=auth.currentUser;if(!user)return;
   const name=$("recipientName").value.trim(),id=$("slug").value.trim(),photo=$("photoUrl").value.trim();
   if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)){$("formStatus").textContent="সঠিক শেয়ার আইডি দিন। ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও হাইফেন ব্যবহার করুন।";return;}
   if(photo&&!/^https:\/\/\S+$/i.test(photo)){$("formStatus").textContent="ছবির লিংক https:// দিয়ে শুরু হতে হবে।";return;}
-  const data={ownerUid:user.uid,recipientName:name,age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,audioUrl:$("audioUrl").value.trim()||null,attachmentUrl:$("attachmentUrl").value.trim()||null,slug:id,updatedAt:serverTimestamp()};
-  if(!name||!data.message){$("formStatus").textContent="নাম ও শুভেচ্ছাবার্তা অবশ্যই লিখতে হবে।";return;}
+  const data={ownerUid:user.uid,eventName:$("eventName").value.trim(),recipientName:name,age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,audioUrl:$("audioUrl").value.trim()||null,attachmentUrl:$("attachmentUrl").value.trim()||null,topLabel:$("topLabel").value.trim(),greetingTitle:$("greetingTitle").value.trim(),overlayTitle:$("overlayTitle").value.trim(),overlayMessage:$("overlayMessage").value.trim(),startButtonText:$("startButtonText").value.trim(),overlayNote:$("overlayNote").value.trim(),ageText:$("ageText").value.trim(),attachmentLabel:$("attachmentLabel").value.trim(),cakeTitle:$("cakeTitle").value.trim(),cakeInstruction:$("cakeInstruction").value.trim(),blowButtonText:$("blowButtonText").value.trim(),relightButtonText:$("relightButtonText").value.trim(),cakeMessageText:$("cakeMessageText").value.trim(),footerText:$("footerText").value.trim(),slug:id,updatedAt:serverTimestamp()};
+  if(!data.eventName||!name||!data.message){$("formStatus").textContent="শুভেচ্ছার নাম, রিসিভারের নাম ও মূল বার্তা অবশ্যই লিখতে হবে।";return;}
   $("saveBtn").disabled=true;$("formStatus").textContent="সংরক্ষণ করা হচ্ছে...";
   try{
     const ref=doc(db,"wishes",id),existing=await getDoc(ref);
@@ -92,7 +92,7 @@ form.addEventListener("submit",async e=>{
     if(editingId&&editingId!==id)throw new Error("পুরোনো লিংক সচল রাখতে বিদ্যমান শেয়ার আইডি পরিবর্তন করা যাবে না।");
     if(!existing.exists())data.createdAt=serverTimestamp();
     await setDoc(ref,data,{merge:true});
-    $("formStatus").textContent="সফলভাবে সংরক্ষণ হয়েছে।";form.reset();editingId=null;$("slug").dataset.manual="";$("saveBtn").textContent="✨ জন্মদিনের পাতা তৈরি করুন";await loadWishes(user.uid);
+    $("formStatus").textContent="সফলভাবে সংরক্ষণ হয়েছে।";form.reset();editingId=null;$("slug").dataset.manual="";$("saveBtn").textContent="✨ শুভেচ্ছার পাতা তৈরি করুন";$("formTitle").textContent="নতুন শুভেচ্ছা তৈরি করুন";await loadWishes(user.uid);
   }catch(err){$("formStatus").textContent=err.message||"আয়োজনটি সংরক্ষণ করা যায়নি।";}
   finally{$("saveBtn").disabled=false;}
 });
@@ -103,6 +103,7 @@ async function loadWishes(uid){
   const items=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   $("projectCount").textContent=`${items.length}টি আয়োজন`;
   $("wishRows").innerHTML=items.length?items.map(w=>`<tr class="border-b border-white/10 align-top">
+    <td class="py-4 pr-3"><div class="font-semibold">${safeText(w.eventName||"শুভেচ্ছা")}</div></td>
     <td class="py-4 pr-3"><div class="font-semibold">${safeText(w.recipientName)}</div><div class="text-xs text-slate-400">${w.age??"—"} বছর</div></td>
     <td class="py-4 pr-3 font-mono text-cyan-200">${safeText(w.id)}</td>
     <td class="py-4"><div class="flex flex-wrap gap-2">
@@ -111,7 +112,7 @@ async function loadWishes(uid){
       <button data-action="preview" data-id="${safeText(w.id)}" class="rounded-lg bg-white/10 px-2 py-1">দেখুন</button>
       <button data-action="edit" data-id="${safeText(w.id)}" class="rounded-lg bg-indigo-500/30 px-2 py-1">সম্পাদনা</button>
       <button data-action="delete" data-id="${safeText(w.id)}" class="rounded-lg bg-rose-500/20 text-rose-200 px-2 py-1">মুছুন</button>
-    </div></td></tr>`).join(""):'<tr><td colspan="3" class="py-8 text-center text-slate-400">এখনো কোনো জন্মদিনের আয়োজন তৈরি করেননি।</td></tr>';
+    </div></td></tr>`).join(""):'<tr><td colspan="3" class="py-8 text-center text-slate-400">এখনো কোনো শুভেচ্ছার আয়োজন তৈরি করেননি।</td></tr>';
 }
 $("wishRows").addEventListener("click",async e=>{
   const b=e.target.closest("button[data-action]");if(!b)return;
@@ -124,9 +125,10 @@ $("wishRows").addEventListener("click",async e=>{
     if(action==="delete"&&confirm(`"${id}" আয়োজনটি মুছে ফেলবেন? এটি আর ফিরিয়ে আনা যাবে না।`)){await deleteDoc(doc(db,"wishes",id));await loadWishes(user.uid);}
     if(action==="edit"){
       const s=await getDoc(doc(db,"wishes",id));if(!s.exists()||s.data().ownerUid!==user.uid)return;
-      const d=s.data();editingId=id;$("recipientName").value=d.recipientName||"";$("age").value=d.age??"";$("birthDate").value=d.birthDate||"";
-      $("message").value=d.message||"";$("photoUrl").value=d.photoUrl||"";$("audioUrl").value=d.audioUrl||"";$("attachmentUrl").value=d.attachmentUrl||"";$("slug").value=id;
-      $("saveBtn").textContent="পরিবর্তন সংরক্ষণ করুন";$("formStatus").textContent=`সম্পাদনা করছেন: ${id}`;window.scrollTo({top:0,behavior:"smooth"});
+      const d=s.data();editingId=id;
+      const fields=["eventName","recipientName","age","birthDate","message","photoUrl","audioUrl","attachmentUrl","topLabel","greetingTitle","overlayTitle","overlayMessage","startButtonText","overlayNote","ageText","attachmentLabel","cakeTitle","cakeInstruction","blowButtonText","relightButtonText","cakeMessageText","footerText"];
+      fields.forEach(k=>{if($(k))$(k).value=d[k]??"";});if(!d.eventName)$("eventName").value="শুভ জন্মদিন";$("slug").value=id;
+      $("formTitle").textContent="শুভেচ্ছার পাতা সম্পাদনা করুন";$("saveBtn").textContent="পরিবর্তন সংরক্ষণ করুন";$("formStatus").textContent=`সম্পাদনা করছেন: ${id}`;window.scrollTo({top:0,behavior:"smooth"});
     }
   }catch(err){alert(err.message||"কাজটি সম্পন্ন করা যায়নি।");}
 });

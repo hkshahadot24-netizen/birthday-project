@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>জন্মদিন স্টুডিও — ব্যক্তিগত ড্যাশবোর্ড</title>
+  <title>শুভেচ্ছা স্টুডিও — ব্যক্তিগত ড্যাশবোর্ড</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
@@ -13,7 +13,7 @@
 </head>
 <body class="min-h-screen">
   <header class="max-w-7xl mx-auto px-5 py-6 flex items-center justify-between">
-    <div><p class="text-pink-300 text-xs uppercase tracking-[.3em]">জন্মদিন উদযাপন প্ল্যাটফর্ম</p><h1 class="text-2xl font-black">🎂 জন্মদিন স্টুডিও</h1></div>
+    <div><p class="text-pink-300 text-xs uppercase tracking-[.3em]">সকল উপলক্ষের শুভেচ্ছা প্ল্যাটফর্ম</p><h1 class="text-2xl font-black">💌 শুভেচ্ছা স্টুডিও</h1></div>
     <button id="logoutBtn" class="hidden btn bg-white/10 hover:bg-white/20">লগ আউট</button>
   </header>
   <main class="max-w-7xl mx-auto px-5 pb-12">
@@ -28,7 +28,7 @@
       <p class="text-xs text-slate-400 mt-4">প্রতিটি Google অ্যাকাউন্টের জন্য আলাদা ব্যক্তিগত জায়গা রয়েছে। এখানে আপনি নিজের জন্মদিনের শুভেচ্ছা তৈরি ও পরিচালনা করতে পারবেন।</p>
     </section>
     <section id="appPanel" class="hidden space-y-7">
-      <div class="flex flex-wrap items-end justify-between gap-3"><div><p class="text-cyan-300 text-xs uppercase tracking-widest">ব্যক্তিগত ড্যাশবোর্ড</p><h2 class="text-3xl font-black">আমার জন্মদিনের আয়োজন</h2></div><span id="projectCount" class="text-slate-300 text-sm">০টি আয়োজন</span></div>
+      <div class="flex flex-wrap items-end justify-between gap-3"><div><p class="text-cyan-300 text-xs uppercase tracking-widest">ব্যক্তিগত ড্যাশবোর্ড</p><h2 class="text-3xl font-black">আমার শুভেচ্ছার আয়োজন</h2></div><span id="projectCount" class="text-slate-300 text-sm">০টি আয়োজন</span></div>
 
       <section id="profileCard" class="glass rounded-2xl p-4 flex items-center gap-4">
         <img id="profilePhoto" src="https://ui-avatars.com/api/?name=User&background=312e81&color=fff"
@@ -42,10 +42,33 @@
 
       <div class="grid lg:grid-cols-[.85fr_1.15fr] gap-6">
         <form id="wishForm" class="glass rounded-3xl p-6 space-y-4">
-          <div class="flex items-center justify-between"><h3 class="text-xl font-bold">নতুন জন্মদিনের শুভেচ্ছা তৈরি করুন</h3><button type="button" id="resetBtn" class="text-sm text-cyan-300">ফর্ম পরিষ্কার করুন</button></div>
-          <input id="recipientName" required maxlength="80" placeholder="যার জন্মদিন, তাঁর নাম লিখুন" class="w-full rounded-xl p-3">
+          <div class="flex items-center justify-between"><h3 id="formTitle" class="text-xl font-bold">নতুন শুভেচ্ছা তৈরি করুন</h3><button type="button" id="resetBtn" class="text-sm text-cyan-300">ফর্ম পরিষ্কার করুন</button></div>
+          <input id="eventName" required maxlength="100" placeholder="শুভেচ্ছার নাম (যেমন: ঈদ মোবারক / শুভ জন্মদিন)" class="w-full rounded-xl p-3">
+          <input id="recipientName" required maxlength="80" placeholder="যাঁকে শুভেচ্ছা জানাবেন, তাঁর নাম" class="w-full rounded-xl p-3">
           <div class="grid grid-cols-2 gap-3"><input id="age" type="number" min="0" max="150" placeholder="বয়স" class="w-full rounded-xl p-3"><input id="birthDate" type="date" aria-label="জন্মতারিখ" class="w-full rounded-xl p-3"></div>
-          <textarea id="message" required maxlength="1500" rows="4" placeholder="আপনার মনের কথা দিয়ে সুন্দর জন্মদিনের শুভেচ্ছা লিখুন..." class="w-full rounded-xl p-3"></textarea>
+          <label class="block text-sm font-bold text-cyan-200">রিসিভার পেইজের লেখা ও কনটেন্ট</label>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <input id="topLabel" maxlength="160" placeholder="উপরের ছোট শিরোনাম" class="w-full rounded-xl p-3">
+            <input id="greetingTitle" maxlength="120" placeholder="মূল শুভেচ্ছার শিরোনাম" class="w-full rounded-xl p-3">
+            <input id="overlayTitle" maxlength="160" placeholder="চমকের শুরুর শিরোনাম" class="w-full rounded-xl p-3">
+            <input id="startButtonText" maxlength="100" placeholder="শুরু করার বাটনের লেখা" class="w-full rounded-xl p-3">
+          </div>
+          <textarea id="overlayMessage" maxlength="500" rows="2" placeholder="শুরুর পর্দার বর্ণনা" class="w-full rounded-xl p-3"></textarea>
+          <input id="overlayNote" maxlength="200" placeholder="শুরুর পর্দার নিচের ছোট লেখা" class="w-full rounded-xl p-3">
+          <textarea id="message" required maxlength="5000" rows="5" placeholder="মূল শুভেচ্ছাবার্তা / বিস্তারিত লেখা" class="w-full rounded-xl p-3"></textarea>
+          <input id="ageText" maxlength="120" placeholder="বয়সের পরের লেখা (যেমন: বছর পূর্তির আনন্দ উদযাপন)" class="w-full rounded-xl p-3">
+          <div class="grid sm:grid-cols-2 gap-3">
+            <input id="attachmentLabel" maxlength="100" placeholder="সংযুক্ত ফাইলের বাটনের লেখা" class="w-full rounded-xl p-3">
+            <input id="cakeTitle" maxlength="160" placeholder="কেক/বিশেষ অংশের শিরোনাম" class="w-full rounded-xl p-3">
+          </div>
+          <textarea id="cakeInstruction" maxlength="300" rows="2" placeholder="কেকের নিচের নির্দেশনা" class="w-full rounded-xl p-3"></textarea>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <input id="blowButtonText" maxlength="100" placeholder="প্রথম বাটনের লেখা" class="w-full rounded-xl p-3">
+            <input id="relightButtonText" maxlength="100" placeholder="দ্বিতীয় বাটনের লেখা" class="w-full rounded-xl p-3">
+          </div>
+          <input id="cakeMessageText" maxlength="200" placeholder="কেকের নিচের বার্তা" class="w-full rounded-xl p-3">
+          <input id="footerText" maxlength="200" placeholder="পেইজের একদম নিচের লেখা" class="w-full rounded-xl p-3">
+          <label class="block text-sm font-bold text-cyan-200">ছবি, গান ও সংযুক্তি</label>
           <input id="photoUrl" type="url" placeholder="ছবির লিংক (https://...)" class="w-full rounded-xl p-3">
           <input id="audioUrl" type="url" placeholder="গানের লিংক (ঐচ্ছিক)" class="w-full rounded-xl p-3">
           <input id="attachmentUrl" type="url" placeholder="অতিরিক্ত ফাইলের লিংক (ঐচ্ছিক)" class="w-full rounded-xl p-3">
@@ -63,8 +86,8 @@
         <div class="glass rounded-3xl p-6">
           <h3 class="text-xl font-bold mb-4">আমার তৈরি সব আয়োজন</h3>
           <div class="overflow-x-auto"><table class="w-full text-left text-sm min-w-[650px]">
-            <thead class="text-slate-400 border-b border-white/10"><tr><th class="py-3">নাম</th><th>শেয়ার আইডি</th><th>করণীয়</th></tr></thead>
-            <tbody id="wishRows"><tr><td colspan="3" class="py-8 text-center text-slate-400">আপনার আয়োজন দেখতে Google দিয়ে প্রবেশ করুন।</td></tr></tbody>
+            <thead class="text-slate-400 border-b border-white/10"><tr><th class="py-3">শুভেচ্ছার নাম</th><th>রিসিভার</th><th>শেয়ার আইডি</th><th>করণীয়</th></tr></thead>
+            <tbody id="wishRows"><tr><td colspan="4" class="py-8 text-center text-slate-400">আপনার আয়োজন দেখতে Google দিয়ে প্রবেশ করুন।</td></tr></tbody>
           </table></div>
           <p class="text-xs text-slate-400 mt-4">শেয়ার লিংকের মাধ্যমে সবাই শুভেচ্ছার পাতা দেখতে পারবেন। প্রত্যেক অ্যাকাউন্ট শুধু নিজের আয়োজন পরিচালনা করতে পারবে।</p>
         </div>

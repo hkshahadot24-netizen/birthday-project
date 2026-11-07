@@ -8,10 +8,13 @@ if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(id)){showError("জন্মদি�
 else{
   onSnapshot(doc(db,"wishes",id),snap=>{
     if(!snap.exists()){showError("জন্মদিনের পাতাটি মুছে ফেলা হয়েছে অথবা লিংকটি ভুল।");return;}
-    const d=snap.data();$("recipientName").textContent=d.recipientName||"You";
-    $("customMessage").textContent=d.message||"Wishing you a wonderful birthday!";
-    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} বছর পূর্তির আনন্দ উদযাপন`:"";
-    document.title=`Happy Birthday ${d.recipientName||""}`;
+    const d=snap.data();
+    const textDefaults={topLabel:"বিশেষ একটি দিন • বিশেষ একজন মানুষ",greetingTitle:"শুভ জন্মদিন",overlayTitle:"একটি সুন্দর চমক অপেক্ষা করছে!",overlayMessage:"নিচের বোতামে চাপ দিয়ে আয়োজন, গান ও আতশবাজি শুরু করুন।",startButtonText:"🎉 উদযাপন শুরু করুন",overlayNote:"আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।",ageText:"বছর পূর্তির আনন্দ উদযাপন",attachmentLabel:"📎 সংযুক্ত ফাইল খুলুন",cakeTitle:"মনের ইচ্ছা পূরণের কামনা করুন ✨",cakeInstruction:"প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।",blowButtonText:"🌬️ সব মোমবাতি নিভিয়ে দিন",relightButtonText:"🕯️ আবার জ্বালান",cakeMessageText:"মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!",footerText:"ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য"};
+    Object.entries(textDefaults).forEach(([key,fallback])=>{const el=$(key);if(el)el.textContent=d[key]||fallback;});
+    $("recipientName").textContent=d.recipientName||"আপনাকে!";
+    $("customMessage").textContent=d.message||"আপনার দিনটি ভালোবাসা, হাসি ও সুন্দর স্মৃতিতে ভরে উঠুক।";
+    $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} ${d.ageText||textDefaults.ageText}`:"";
+    document.title=`${d.eventName||"শুভেচ্ছা"} — ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
     if(d.photoUrl){$("recipientPhoto").src=d.photoUrl;$("recipientPhoto").classList.remove("hidden");$("photoFallback").classList.add("hidden");}
@@ -61,3 +64,9 @@ addEventListener("resize",resize);resize();
 function burst(){const x=Math.random()*innerWidth,y=Math.random()*innerHeight*.58+30,hue=Math.random()*360;for(let n=0;n<65;n++){const a=Math.PI*2*n/65,s=Math.random()*4+1.2;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:70+Math.random()*25,hue});}}
 function frame(){ctx.clearRect(0,0,innerWidth,innerHeight);if(Math.random()<.045)burst();particles=particles.filter(p=>p.life>0);for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.035;p.vx*=.99;p.life--;ctx.globalAlpha=Math.min(1,p.life/35);ctx.fillStyle=`hsl(${p.hue} 100% 68%)`;ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;raf=requestAnimationFrame(frame);}
 function startFireworks(){if(!raf)frame();}
+// Start the celebration only after the receiver taps the start button.
+$("startBtn").addEventListener("click",()=>{
+  $("startOverlay").classList.add("hidden");
+  startMusic();
+  startFireworks();
+});

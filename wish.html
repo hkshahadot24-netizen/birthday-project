@@ -28,23 +28,23 @@ button{cursor:pointer}
 </head>
 <body>
 <canvas id="fireworks"></canvas>
-<div id="startOverlay"><div class="glass rounded-3xl p-8 max-w-sm w-full text-center"><div class="text-5xl mb-4">🎁</div><h1 class="text-2xl font-black mb-2">একটি সুন্দর চমক অপেক্ষা করছে!</h1><p class="text-purple-100/80 mb-6">নিচের বোতামে চাপ দিয়ে জন্মদিনের আয়োজন, গান ও আতশবাজি শুরু করুন।</p><button id="startBtn" class="rounded-full px-7 py-4 font-bold bg-gradient-to-r from-pink-500 to-violet-500 shadow-xl">🎉 উদযাপন শুরু করুন</button><p class="text-xs text-white/50 mt-4">আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।</p></div></div>
+<div id="startOverlay"><div class="glass rounded-3xl p-8 max-w-sm w-full text-center"><div class="text-5xl mb-4">🎁</div><h1 id="overlayTitle" class="text-2xl font-black mb-2">একটি সুন্দর চমক অপেক্ষা করছে!</h1><p id="overlayMessage" class="text-purple-100/80 mb-6">নিচের বোতামে চাপ দিয়ে আয়োজন, গান ও আতশবাজি শুরু করুন।</p><button id="startBtn" class="rounded-full px-7 py-4 font-bold bg-gradient-to-r from-pink-500 to-violet-500 shadow-xl"><span id="startButtonText">🎉 উদযাপন শুরু করুন</span></button><p id="overlayNote" class="text-xs text-white/50 mt-4">আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।</p></div></div>
 <main class="content min-h-screen flex flex-col items-center text-center px-5 py-10 sm:py-14">
-  <p class="uppercase tracking-[.35em] text-pink-200 text-xs sm:text-sm mb-5">বিশেষ একটি দিন • বিশেষ একজন মানুষ</p>
+  <p id="topLabel" class="uppercase tracking-[.35em] text-pink-200 text-xs sm:text-sm mb-5">বিশেষ একটি দিন • বিশেষ একজন মানুষ</p>
   <img id="recipientPhoto" class="photo hidden mb-5" alt="Birthday recipient">
   <div id="photoFallback" class="text-6xl mb-5">🎂</div>
-  <h1 class="text-4xl sm:text-6xl font-black leading-tight drop-shadow-lg">শুভ জন্মদিন<br><span id="recipientName" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-200 to-cyan-200">আপনাকে!</span></h1>
+  <h1 class="text-4xl sm:text-6xl font-black leading-tight drop-shadow-lg"><span id="greetingTitle">শুভ জন্মদিন</span><br><span id="recipientName" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-200 to-cyan-200">আপনাকে!</span></h1>
   <p id="ageLine" class="text-lg text-pink-100 mt-3"></p>
-  <section class="glass rounded-3xl p-6 sm:p-8 max-w-2xl w-full mt-8"><p class="text-2xl mb-3">💌</p><p id="customMessage" class="text-base sm:text-lg leading-8 whitespace-pre-wrap text-purple-50">আপনার দিনটি ভালোবাসা, হাসি ও সুন্দর স্মৃতিতে ভরে উঠুক।</p><a id="attachmentLink" class="hidden inline-block mt-5 rounded-full bg-white/15 px-5 py-3 text-sm font-semibold" target="_blank" rel="noopener">📎 সংযুক্ত ফাইল খুলুন</a><audio id="birthdayAudio" class="hidden" controls preload="none"></audio></section>
-  <section class="mt-9 w-full max-w-md"><h2 class="font-bold text-xl mb-2">মনের ইচ্ছা পূরণের কামনা করুন ✨</h2><p class="text-sm text-purple-100/70 mb-2">প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।</p>
+  <section class="glass rounded-3xl p-6 sm:p-8 max-w-2xl w-full mt-8"><p class="text-2xl mb-3">💌</p><p id="customMessage" class="text-base sm:text-lg leading-8 whitespace-pre-wrap text-purple-50">আপনার দিনটি ভালোবাসা, হাসি ও সুন্দর স্মৃতিতে ভরে উঠুক।</p><a id="attachmentLink" class="hidden inline-block mt-5 rounded-full bg-white/15 px-5 py-3 text-sm font-semibold" target="_blank" rel="noopener"><span id="attachmentLabel">📎 সংযুক্ত ফাইল খুলুন</span></a><audio id="birthdayAudio" class="hidden" controls preload="none"></audio></section>
+  <section class="mt-9 w-full max-w-md"><h2 id="cakeTitle" class="font-bold text-xl mb-2">মনের ইচ্ছা পূরণের কামনা করুন ✨</h2><p id="cakeInstruction" class="text-sm text-purple-100/70 mb-2">প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।</p>
     <div class="cake-wrap" id="cake" aria-label="Interactive birthday cake">
       <div class="candle" style="left:77px"><span class="flame"></span></div><div class="candle" style="left:119px"><span class="flame"></span></div><div class="candle" style="left:161px"><span class="flame"></span></div>
       <div class="cake"></div><div class="plate"></div>
     </div>
-    <div class="flex flex-wrap justify-center gap-3 mt-2"><button id="blowBtn" class="rounded-full bg-white/15 px-5 py-3 font-semibold">🌬️ সব মোমবাতি নিভিয়ে দিন</button><button id="relightBtn" class="rounded-full bg-white/10 px-5 py-3">🕯️ আবার জ্বালান</button></div>
-    <p id="cakeMessage" class="text-pink-200 text-sm mt-4" aria-live="polite">মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!</p>
+    <div class="flex flex-wrap justify-center gap-3 mt-2"><button id="blowBtn" class="rounded-full bg-white/15 px-5 py-3 font-semibold"><span id="blowButtonText">🌬️ সব মোমবাতি নিভিয়ে দিন</span></button><button id="relightBtn" class="rounded-full bg-white/10 px-5 py-3"><span id="relightButtonText">🕯️ আবার জ্বালান</span></button></div>
+    <p id="cakeMessage" class="text-pink-200 text-sm mt-4" aria-live="polite"><span id="cakeMessageText">মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!</span></p>
   </section>
-  <footer class="text-xs text-white/40 mt-12">ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য</footer>
+  <footer class="text-xs text-white/40 mt-12"><span id="footerText">ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য</span></footer>
 </main>
 <script type="module" src="./wish.js"></script>
 </body></html>
