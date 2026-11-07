@@ -1,5 +1,5 @@
-// Set this to your deployed Cloudflare Worker URL, e.g.
-// https://birthday-assets-uploader.<your-subdomain>.workers.dev
+// Deployed Cloudflare Worker endpoint for GitHub Assets uploads.
+// Keep the base URL here; the app appends /upload automatically.
 export const uploadConfig = {
-  workerUrl: ""
+  workerUrl: "https://birthday-assets-uploader.hkshahadot24.workers.dev"
 };

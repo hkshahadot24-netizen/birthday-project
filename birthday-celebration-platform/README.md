@@ -47,7 +47,7 @@ The browser sends the current Firebase ID token to the Worker. The Worker verifi
    - `FIREBASE_PROJECT_ID` = `birthday-wish-15e13`
    - `ALLOWED_ORIGINS` = `https://hkshahadot24-netizen.github.io,http://localhost:8000,http://127.0.0.1:8000`
 7. Save and deploy. Copy the Worker URL, e.g. `https://birthday-assets-uploader.<your-subdomain>.workers.dev`.
-8. Open `upload-config.js` and set `workerUrl` to that URL (without `/upload`). Commit and push the updated project to GitHub Pages.
+8. The deployed Worker URL is already filled in `upload-config.js` as `https://birthday-assets-uploader.hkshahadot24.workers.dev` (without `/upload`). If you ever rename the Worker, update that value and commit the file to GitHub Pages.
 
 ### Upload behavior
 - Image files → `Assets/Images/` and their URL is inserted into the Photo URL field.
