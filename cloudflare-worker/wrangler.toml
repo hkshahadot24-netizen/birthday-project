@@ -1,0 +1,10 @@
+name = "birthday-assets-uploader"
+main = "src/index.js"
+compatibility_date = "2026-11-07"
+
+[vars]
+GITHUB_OWNER = "hkshahadot24-netizen"
+GITHUB_REPO = "birthday-project"
+GITHUB_BRANCH = "main"
+FIREBASE_PROJECT_ID = "birthday-wish-15e13"
+ALLOWED_ORIGINS = "https://hkshahadot24-netizen.github.io,http://localhost:8000,http://127.0.0.1:8000"
