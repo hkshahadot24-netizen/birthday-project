@@ -47,9 +47,17 @@ async function createOrUpdateProfile(user){
   await setDoc(ref,profile,{merge:true});
 }
 function renderProfile(user){
-  $("profileName").textContent=user.displayName||"Google user";
-  $("profileEmail").textContent=user.email||"";
-  $("profilePhoto").src=user.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName||"User")}&background=312e81&color=fff`;
+  const name = user.displayName || "Google user";
+  const nameEl = $("profileName");
+  const emailEl = $("profileEmail");
+  const photoEl = $("profilePhoto");
+  // Keep the workspace resilient if a profile element is omitted in a future layout edit.
+  if (nameEl) nameEl.textContent = name;
+  if (emailEl) emailEl.textContent = user.email || "";
+  if (photoEl) {
+    photoEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=312e81&color=fff`;
+    photoEl.alt = `${name} profile photo`;
+  }
 }
 
 $("recipientName").addEventListener("input",()=>{if(!editingId&&!$("slug").dataset.manual)$("slug").value=slugify($("recipientName").value);});

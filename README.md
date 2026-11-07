@@ -70,3 +70,9 @@ Open `http://localhost:8000/admin.html`. For local upload testing, `http://local
 - Never expose `GITHUB_TOKEN`, Firebase service-account JSON, or other server credentials in frontend files.
 - Existing wishes created before multi-user ownership was added may lack `ownerUid`; migrate those documents using a trusted admin process if they should appear in a user's workspace.
 - The public wish viewer intentionally allows direct reads by document ID. Do not store private information in wish documents.
+
+
+## Latest compatibility fix
+The root `index.html` and `admin.html` now both include the signed-in Google profile elements
+(`profileName`, `profileEmail`, and `profilePhoto`) required by the workspace renderer.
+The profile renderer also checks that these elements exist before updating them.
