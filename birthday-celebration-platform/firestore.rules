@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsWish() {
+      return signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      // Each signed-in Google account can read/create/update only its own profile.
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.email == request.auth.token.email;
+      allow delete: if false;
+    }
+
+    match /wishes/{wishId} {
+      // Anyone with the exact wish URL can view that birthday page.
+      allow get: if true;
+      // The Admin dashboard query must include where(ownerUid == current UID).
+      allow list: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.slug == wishId
+        && request.resource.data.recipientName is string
+        && request.resource.data.message is string;
+      allow update: if ownsWish()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.slug == wishId
+        && request.resource.data.recipientName is string
+        && request.resource.data.message is string;
+      allow delete: if ownsWish();
+    }
+  }
+}
