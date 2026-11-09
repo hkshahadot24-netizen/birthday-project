@@ -14,6 +14,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Login history is private to its owner. Each entry is append-only from the client.
+    match /users/{userId}/loginHistory/{entryId} {
+      allow get, list: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.provider == "Google"
+        && request.resource.data.method == "Google Sign-In";
+      allow update, delete: if false;
+    }
+
     match /wishes/{wishId} {
       // Public single-document reads are required for shareable birthday URLs.
       allow get: if true;

@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, serverTimestamp, query, where, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
-import { uploadConfig } from "./upload-config.js";
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:"select_account"});
@@ -32,7 +31,12 @@ $("googleLoginBtn").onclick=async()=>{
     $("loginError").textContent=messages[err.code]||`লগইন করা যায়নি: ${err.message}`;
   }
 };
-$("logoutBtn").onclick=()=>signOut(auth);
+$("logoutBtn").onclick=async()=>{
+  try{
+    if(auth.currentUser)sessionStorage.removeItem(`birthWishLoginLogged:${auth.currentUser.uid}`);
+    await signOut(auth);
+  }catch(err){$("loginError").textContent=err.message||"লগ আউট করা যায়নি।";}
+};
 
 onAuthStateChanged(auth,async user=>{
   if(!user){loginPanel.classList.remove("hidden");appPanel.classList.add("hidden");$("logoutBtn").classList.add("hidden");return;}
@@ -40,7 +44,10 @@ onAuthStateChanged(auth,async user=>{
     await createOrUpdateProfile(user);
     renderProfile(user);
     loginPanel.classList.add("hidden");appPanel.classList.remove("hidden");$("logoutBtn").classList.remove("hidden");
-    await loadWishes(user.uid);
+    // Record one entry per signed-in browser tab session; refreshing the page will not duplicate it.
+    try{await recordLoginSession(user);}
+    catch(historyError){console.warn("Login history could not be recorded:",historyError);}
+    await Promise.all([loadWishes(user.uid),loadLoginHistory(user.uid)]);
   }catch(err){
     $("loginError").textContent=`আপনার ব্যক্তিগত ড্যাশবোর্ড খোলা যায়নি: ${err.message||"আবার চেষ্টা করুন।"}`;
     appPanel.classList.add("hidden");loginPanel.classList.remove("hidden");
@@ -70,6 +77,72 @@ function renderProfile(user){
   if (photoEl) {
     photoEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=312e81&color=fff`;
     photoEl.alt = `${name} profile photo`;
+  }
+}
+
+function getClientLoginDetails(){
+  let timezone="অজানা";
+  try{timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||timezone;}catch(_){}
+  return {
+    browser:navigator.userAgent||"অজানা",
+    platform:navigator.platform||"অজানা",
+    language:navigator.language||"অজানা",
+    timezone
+  };
+}
+async function recordLoginSession(user){
+  const sessionKey=`birthWishLoginLogged:${user.uid}`;
+  if(sessionStorage.getItem(sessionKey)==="1")return;
+  const details=getClientLoginDetails();
+  await addDoc(collection(db,"users",user.uid,"loginHistory"),{
+    uid:user.uid,
+    email:user.email||"",
+    displayName:user.displayName||"Google ব্যবহারকারী",
+    provider:"Google",
+    method:"Google Sign-In",
+    browser:details.browser,
+    platform:details.platform,
+    language:details.language,
+    timezone:details.timezone,
+    createdAt:serverTimestamp()
+  });
+  sessionStorage.setItem(sessionKey,"1");
+}
+function formatLoginTime(timestamp){
+  if(!timestamp)return "সময় সংরক্ষণ হচ্ছে...";
+  const date=timestamp.toDate?timestamp.toDate():new Date(timestamp);
+  if(Number.isNaN(date.getTime()))return "সময় পাওয়া যায়নি";
+  return new Intl.DateTimeFormat("bn-BD",{dateStyle:"medium",timeStyle:"short"}).format(date);
+}
+async function loadLoginHistory(uid){
+  const container=$("loginHistoryRows");
+  if(!container)return;
+  container.innerHTML='<p class="text-sm text-slate-400">লগইন ইতিহাস লোড হচ্ছে...</p>';
+  try{
+    const historyQuery=query(collection(db,"users",uid,"loginHistory"),orderBy("createdAt","desc"),limit(10));
+    const snapshot=await getDocs(historyQuery);
+    if(snapshot.empty){
+      container.innerHTML='<p class="text-sm text-slate-400">এখনো কোনো লগইন ইতিহাস পাওয়া যায়নি। পরবর্তী লগইন থেকে এখানে দেখা যাবে।</p>';
+      return;
+    }
+    container.innerHTML=snapshot.docs.map(item=>{
+      const entry=item.data();
+      const device=safeText(entry.platform||"ডিভাইস অজানা");
+      const browser=safeText(entry.browser||"ব্রাউজার অজানা");
+      const language=safeText(entry.language||"");
+      const timezone=safeText(entry.timezone||"");
+      return `<article class="rounded-xl border border-white/10 bg-black/10 p-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="font-semibold text-sm">🔐 ${safeText(formatLoginTime(entry.createdAt))}</p>
+          <span class="text-[10px] rounded-full bg-emerald-400/10 text-emerald-200 px-2 py-1">সফল লগইন</span>
+        </div>
+        <p class="text-xs text-slate-300 mt-2">${device} · ${language}</p>
+        <p class="text-[11px] text-slate-400 mt-1 break-all">${browser}</p>
+        <p class="text-[10px] text-slate-500 mt-1">টাইমজোন: ${timezone} · ${safeText(entry.provider||"Google")}</p>
+      </article>`;
+    }).join("");
+  }catch(err){
+    container.innerHTML=`<p class="text-sm text-rose-200">লগইন ইতিহাস লোড করা যায়নি। Firestore Rules আপডেট করুন। (${safeText(err.message||"ত্রুটি")})</p>`;
   }
 }
 
@@ -135,28 +208,62 @@ $("closeQr").onclick=()=>$("qrDialog").close();
 $("downloadQr").onclick=()=>{const canvas=$("qrCanvas").querySelector("canvas"),img=$("qrCanvas").querySelector("img"),source=canvas||img;if(!source)return;const a=document.createElement("a");a.href=canvas?canvas.toDataURL("image/png"):img.src;a.download="birthday-qr.png";a.click();};
 
 
-// Secure GitHub Assets uploader. GitHub credentials live only in Cloudflare Worker secrets.
-$("uploadAssetBtn").addEventListener("click", async () => {
-  const user=auth.currentUser, file=$("assetFile").files?.[0], status=$("uploadStatus"), btn=$("uploadAssetBtn");
-  if(!user){status.textContent="আগে Google অ্যাকাউন্ট দিয়ে প্রবেশ করুন।";return;}
-  if(!file){status.textContent="প্রথমে একটি ছবি, অডিও অথবা সমর্থিত ফাইল নির্বাচন করুন।";return;}
-  if(!uploadConfig.workerUrl || !/^https:\/\//i.test(uploadConfig.workerUrl)){
-    status.textContent="Cloudflare আপলোড সার্ভারের ঠিকানা পাওয়া যায়নি। upload-config.js পরীক্ষা করুন।";return;
+// Image-only direct upload to imgbb. No image URL entry is required from the user.
+const IMGBB_API_KEY = "5d48f4f83edce3fcb9dac8223dc6d810";
+let selectedPhotoFile = null;
+$("photoFile").addEventListener("change", () => {
+  const file=$("photoFile").files?.[0];
+  const status=$("uploadStatus");
+  selectedPhotoFile=file||null;
+  if(!file){
+    $("photoPreviewWrap").classList.add("hidden");
+    status.textContent="";
+    return;
   }
-  const category=file.type.startsWith("image/")?"Images":file.type.startsWith("audio/")?"Audio":"Files";
-  if(file.size>8*1024*1024){status.textContent="ফাইলটি ৮ MB-এর বেশি। ছোট ফাইল নির্বাচন করুন।";return;}
-  btn.disabled=true;status.textContent="GitHub Assets-এ নিরাপদে আপলোড হচ্ছে...";
+  if(!file.type.startsWith("image/")){
+    selectedPhotoFile=null;
+    $("photoFile").value="";
+    status.textContent="শুধু ছবি নির্বাচন করুন।";
+    return;
+  }
+  if(file.size>8*1024*1024){
+    selectedPhotoFile=null;
+    $("photoFile").value="";
+    status.textContent="ছবিটি ৮ MB-এর বেশি। ছোট ছবি নির্বাচন করুন।";
+    return;
+  }
+  $("photoPreview").src=URL.createObjectURL(file);
+  $("photoPreviewWrap").classList.remove("hidden");
+  $("photoUploadStatus").textContent="ছবিটি আপলোডের জন্য প্রস্তুত।";
+  status.textContent="";
+});
+$("uploadPhotoBtn").addEventListener("click", async () => {
+  const user=auth.currentUser, file=selectedPhotoFile, status=$("uploadStatus"), btn=$("uploadPhotoBtn");
+  if(!user){status.textContent="আগে Google অ্যাকাউন্ট দিয়ে প্রবেশ করুন।";return;}
+  if(!file){status.textContent="প্রথমে একটি ছবি নির্বাচন করুন।";return;}
+  if(file.size>8*1024*1024){status.textContent="ছবিটি ৮ MB-এর বেশি।";return;}
+  btn.disabled=true;status.textContent="imgbb-তে ছবি আপলোড হচ্ছে...";
   try{
-    const token=await user.getIdToken(true), body=new FormData();body.append("file",file);body.append("category",category);
-    const endpoint=uploadConfig.workerUrl.replace(/\/$/,"")+"/upload";
-    const response=await fetch(endpoint,{method:"POST",headers:{Authorization:`Bearer ${token}`},body});
-    let result={};try{result=await response.json();}catch(_){throw new Error(`সার্ভার থেকে সঠিক উত্তর পাওয়া যায়নি (HTTP ${response.status})। Cloudflare Worker-এর Deployment ও Logs পরীক্ষা করুন।`);}
-    if(!response.ok||!result.ok)throw new Error(`${result.error||"আপলোড ব্যর্থ হয়েছে"} (HTTP ${response.status})`);
-    if(category==="Images")$("photoUrl").value=result.url;
-    else if(category==="Audio")$("audioUrl").value=result.url;
-    else $("attachmentUrl").value=result.url;
-    status.innerHTML=`আপলোড সম্পন্ন: <a class="underline text-cyan-200 break-all" target="_blank" rel="noopener" href="${safeText(result.url)}">${safeText(result.path)}</a><br>লিংকটি সংশ্লিষ্ট ঘরে বসানো হয়েছে। জন্মদিনের আয়োজনটি সংরক্ষণ করুন।`;
-    $("assetFile").value="";
-  }catch(err){status.textContent=err.message||"আপলোড ব্যর্থ হয়েছে।";}
-  finally{btn.disabled=false;}
+    const body=new FormData();
+    body.append("image",file);
+    const response=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body});
+    const result=await response.json();
+    if(!response.ok||!result.success||!result.data?.url)throw new Error(result.error?.message||"imgbb-তে ছবি আপলোড করা যায়নি।");
+    $("photoUrl").value=result.data.display_url||result.data.url;
+    $("photoPreview").src=$("photoUrl").value;
+    $("photoUploadStatus").textContent="ছবি সফলভাবে আপলোড হয়েছে।";
+    status.textContent="ছবি আপলোড সম্পন্ন। এখন জন্মদিনের পাতা সংরক্ষণ করুন।";
+    selectedPhotoFile=null;
+    $("photoFile").value="";
+  }catch(err){
+    status.textContent=err.message||"ছবি আপলোড ব্যর্থ হয়েছে।";
+  }finally{btn.disabled=false;}
+});
+
+form.addEventListener("reset",()=>{
+  selectedPhotoFile=null;
+  const picker=$("photoFile");
+  if(picker)picker.value="";
+  $("photoPreviewWrap")?.classList.add("hidden");
+  if($("uploadStatus"))$("uploadStatus").textContent="";
 });

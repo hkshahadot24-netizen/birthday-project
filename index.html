@@ -18,14 +18,30 @@ input:focus,textarea:focus{border-color:#818cf8!important;box-shadow:0 0 0 3px #
 <section id="appPanel" class="hidden space-y-5 sm:space-y-6">
 <div class="flex flex-wrap items-end justify-between gap-3"><div><p class="text-cyan-300 text-xs font-bold tracking-widest">PERSONAL DASHBOARD</p><h2 class="text-2xl sm:text-3xl font-black mt-1">আমার জন্মদিনের আয়োজন</h2></div><span id="projectCount" class="rounded-full bg-white/10 px-3 py-2 text-xs text-slate-200">০টি আয়োজন</span></div>
 <section id="profileCard" class="glass rounded-2xl p-3 sm:p-4 flex items-center gap-3"><img id="profilePhoto" src="https://ui-avatars.com/api/?name=User&background=312e81&color=fff" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-white/20"><div class="min-w-0"><p class="text-[11px] text-cyan-300">লগইন করা অ্যাকাউন্ট</p><p id="profileName" class="font-bold truncate">Google ব্যবহারকারী</p><p id="profileEmail" class="text-xs text-slate-300 truncate"></p></div></section>
+<section id="loginHistoryCard" class="glass rounded-2xl p-4 sm:p-5">
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <div><p class="text-cyan-300 text-xs font-bold tracking-widest">ACCOUNT SECURITY</p><h3 class="text-lg font-black mt-1">লগইন ইতিহাস</h3></div>
+    <span class="text-2xl" aria-hidden="true">🕘</span>
+  </div>
+  <p class="text-xs text-slate-400 mb-3">আপনার অ্যাকাউন্টে সাম্প্রতিক প্রবেশের তথ্য এখানে সংরক্ষিত থাকবে।</p>
+  <div id="loginHistoryRows" class="space-y-2" aria-live="polite"><p class="text-sm text-slate-400">লগইন ইতিহাস লোড হচ্ছে...</p></div>
+</section>
 <div class="grid lg:grid-cols-[.88fr_1.12fr] gap-5 sm:gap-6 items-start">
 <form id="wishForm" class="glass rounded-3xl p-4 sm:p-6 space-y-4">
 <div class="flex items-center justify-between gap-2"><div><p class="text-pink-300 text-xs font-bold">🎂 BIRTHDAY WISH</p><h3 id="formTitle" class="text-xl font-black mt-1">নতুন শুভেচ্ছা তৈরি করুন</h3></div><button type="button" id="resetBtn" class="text-xs text-cyan-300 font-bold whitespace-nowrap">রিসেট</button></div>
 <div class="field"><label class="field-label" for="recipientName">যাঁর জন্মদিন, তাঁর নাম *</label><input id="recipientName" required maxlength="80" placeholder="নাম লিখুন"></div>
 <div class="grid grid-cols-2 gap-3"><div class="field"><label class="field-label" for="age">বয়স (ঐচ্ছিক)</label><input id="age" type="number" min="0" max="150" placeholder="বয়স"></div><div class="field"><label class="field-label" for="birthDate">জন্মতারিখ (ঐচ্ছিক)</label><input id="birthDate" type="date"></div></div>
 <div class="field"><label class="field-label" for="message">জন্মদিনের শুভেচ্ছাবার্তা *</label><textarea id="message" required maxlength="1500" rows="4" placeholder="আপনার মনের কথা লিখুন..."></textarea></div>
-<div class="space-y-3"><p class="section-title">ছবি, গান ও সংযুক্তি</p><div class="field"><label class="field-label" for="photoUrl">ছবির লিংক (ঐচ্ছিক)</label><input id="photoUrl" type="url" placeholder="https://..."></div><div class="field"><label class="field-label" for="audioUrl">গানের লিংক (ঐচ্ছিক)</label><input id="audioUrl" type="url" placeholder="https://..."></div><div class="field"><label class="field-label" for="attachmentUrl">অতিরিক্ত ফাইলের লিংক (ঐচ্ছিক)</label><input id="attachmentUrl" type="url" placeholder="https://..."></div></div>
-<div class="rounded-2xl border border-white/10 bg-black/15 p-3 sm:p-4 space-y-3"><div><p class="font-bold text-sm">ফাইল আপলোড</p><p class="text-xs text-slate-400 mt-1">ছবি, গান অথবা ফাইল নির্বাচন করুন (সর্বোচ্চ ৮ MB)।</p></div><input id="assetFile" type="file" accept="image/*,audio/*,.pdf,.txt,.csv,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mov,.webm" class="!p-2 !text-sm"><button type="button" id="uploadAssetBtn" class="btn w-full bg-cyan-500/15 text-cyan-100 border border-cyan-300/20">⬆️ ফাইল আপলোড করুন</button><p id="uploadStatus" class="text-xs text-slate-300 break-words" role="status"></p></div>
+<div class="rounded-2xl border border-white/10 bg-black/15 p-3 sm:p-4 space-y-3">
+  <div><p class="font-bold text-sm">🎞️ জন্মদিনের ছবি আপলোড</p><p class="text-xs text-slate-400 mt-1">শুধু ছবি আপলোড করা যাবে। ছবি নির্বাচন করে সরাসরি imgbb-তে আপলোড করুন। কোনো লিংক দিতে হবে না (সর্বোচ্চ ৮ MB)।</p></div>
+  <input id="photoFile" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp" class="!p-2 !text-sm">
+  <div id="photoPreviewWrap" class="hidden"><img id="photoPreview" alt="নির্বাচিত ছবির প্রিভিউ" class="max-h-56 max-w-full mx-auto rounded-xl object-contain border border-white/10"><p id="photoUploadStatus" class="text-xs text-slate-300 mt-2 text-center" role="status"></p></div>
+  <button type="button" id="uploadPhotoBtn" class="btn w-full bg-cyan-500/15 text-cyan-100 border border-cyan-300/20">⬆️ ছবি আপলোড করুন</button>
+  <p id="uploadStatus" class="text-xs text-slate-300 break-words" role="status"></p>
+  <input id="photoUrl" type="hidden">
+  <input id="audioUrl" type="hidden">
+  <input id="attachmentUrl" type="hidden">
+</div>
 <details class="rounded-xl border border-white/10 p-3"><summary class="text-sm font-semibold text-slate-300 cursor-pointer">শেয়ার লিংক আইডি (ঐচ্ছিক)</summary><input id="slug" maxlength="70" pattern="[a-z0-9-]+" placeholder="স্বয়ংক্রিয়ভাবে তৈরি হবে" class="mt-3"><p class="text-[11px] text-slate-400 mt-2">ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও হাইফেন ব্যবহার করুন।</p></details>
 <button id="saveBtn" class="btn w-full bg-gradient-to-r from-fuchsia-500 to-indigo-500 text-white">✨ জন্মদিনের পাতা তৈরি করুন</button><p id="formStatus" class="text-sm" role="status"></p>
 </form>

@@ -3,6 +3,7 @@
 ## যা যা আছে
 - যেকোনো Google/Gmail অ্যাকাউন্ট দিয়ে নিরাপদ লগইন।
 - প্রথম লগইনে স্বয়ংক্রিয় ব্যক্তিগত প্রোফাইল তৈরি।
+- সফল লগইনের সময়, ডিভাইস/ব্রাউজার, ভাষা ও টাইমজোনসহ ব্যক্তিগত লগইন ইতিহাস সংরক্ষণ এবং ড্যাশবোর্ডে সর্বশেষ ১০টি এন্ট্রি দেখা।
 - প্রত্যেক ব্যবহারকারী শুধু নিজের জন্মদিনের আয়োজন দেখতে, তৈরি, সম্পাদনা ও মুছতে পারবেন।
 - প্রতিটি আয়োজনের আলাদা শেয়ার লিংক, QR কোড, প্রিভিউ।
 - বাংলা নাম ও বাংলা শুভেচ্ছাবার্তা।
@@ -20,11 +21,11 @@ Firebase প্রজেক্ট: `birthday-wish-15e13`
 
 ### ব্যক্তিগত ডেটা সুরক্ষা
 - `users/{uid}` প্রোফাইল শুধু সংশ্লিষ্ট ব্যবহারকারী পড়তে/লিখতে পারবেন।
+- `users/{uid}/loginHistory/{entryId}` ইতিহাস শুধু সংশ্লিষ্ট ব্যবহারকারী পড়তে পারবেন; নতুন এন্ট্রি তৈরি করা যাবে, পুরোনো এন্ট্রি ক্লায়েন্ট থেকে পরিবর্তন/মুছতে পারবে না।
 - `wishes`-এ প্রতিটি নতুন ডকুমেন্টে `ownerUid` থাকে।
 - লগইন করা ব্যবহারকারী শুধু নিজের `ownerUid`-এর আয়োজন তালিকাভুক্ত/পরিবর্তন/মুছতে পারবেন।
 - শেয়ার লিংকের জন্য নির্দিষ্ট একটি `wishes/{id}` ডকুমেন্ট পাবলিকভাবে পড়া যায়। তাই সেখানে গোপন তথ্য লিখবেন না।
 
-## GitHub Assets আপলোড — Cloudflare Worker
 
 ### নির্ধারিত ঠিকানা
 - Worker: `https://birthday-assets-uploader.hkshahadot24.workers.dev`
@@ -33,7 +34,6 @@ Firebase প্রজেক্ট: `birthday-wish-15e13`
 - Branch: `main`
 - Firebase project: `birthday-wish-15e13`
 
-`upload-config.js`-এ Worker URL আগে থেকেই সেট করা আছে।
 
 ### Cloudflare-এ যা যাচাই করবেন
 Cloudflare Dashboard → Workers & Pages → `birthday-assets-uploader` → Settings → Variables and Secrets:
@@ -51,7 +51,6 @@ Cloudflare Dashboard → Workers & Pages → `birthday-assets-uploader` → Sett
 GitHub Token-এর জন্য:
 1. Repository access-এ শুধু `birthday-project` নির্বাচন করুন।
 2. Repository permissions → Contents → **Read and write** দিন।
-3. Token-টি Cloudflare Worker-এর Secret হিসেবে যোগ করুন। HTML/JS ফাইলে বা GitHub repository-তে Token রাখবেন না।
 
 ### Worker কোড আপডেট
 এই ZIP-এর `cloudflare-worker/src/index.js` ফাইলের সম্পূর্ণ কোড কপি করুন।
@@ -59,9 +58,6 @@ Cloudflare Dashboard → Workers & Pages → `birthday-assets-uploader` → Edit
 Dashboard-এর Variables/Secret মুছবেন না; শুধু কোড Deploy করুন।
 
 ### আপলোডের গন্তব্য
-- ছবি: `Assets/Images/{Firebase-UID}/`
-- অডিও: `Assets/Audio/{Firebase-UID}/`
-- অন্যান্য ফাইল: `Assets/Files/{Firebase-UID}/`
 
 সর্বোচ্চ ফাইল সাইজ ৮ MB। সফল আপলোড হলে ফাইলের URL স্বয়ংক্রিয়ভাবে সংশ্লিষ্ট Photo / Audio / Attachment ঘরে বসবে। এরপর জন্মদিনের আয়োজনটি Save করতে হবে।
 
@@ -90,3 +86,12 @@ python -m http.server 8000
 
 ## পুরোনো ডেটা
 মাল্টি-ইউজার ব্যবস্থা চালুর আগে তৈরি পুরোনো wish ডকুমেন্টে `ownerUid` না থাকলে সেগুলো ব্যক্তিগত তালিকায় আসবে না। সঠিক মালিকানা যাচাই করে Trusted Admin প্রক্রিয়ায় `ownerUid` যোগ না করা পর্যন্ত সেগুলো পরিবর্তনযোগ্য নয়।
+
+
+## ছবি আপলোড (imgbb)
+
+- ড্যাশবোর্ডে শুধু ছবি আপলোডের সুবিধা রাখা হয়েছে।
+- ছবি নির্বাচন করে **ছবি আপলোড করুন** চাপলে সরাসরি imgbb-তে আপলোড হবে; আলাদা করে কোনো ছবি-লিংক লিখতে হবে না।
+- সর্বোচ্চ ফাইল সাইজ ৮ MB।
+- imgbb API key `admin.js`-এ ব্যবহৃত হয়েছে। ব্রাউজার থেকে সরাসরি আপলোডের ক্ষেত্রে API key ব্যবহারকারীর কাছে দৃশ্যমান হতে পারে; প্রয়োজন হলে imgbb ড্যাশবোর্ড থেকে key rotate করুন এবং production-এ server-side proxy ব্যবহার করুন।
+- আগের তৈরি birthday wish-এ সংরক্ষিত `photoUrl`, `audioUrl` ও `attachmentUrl` ডেটা অক্ষত থাকবে; নতুন admin form-এ আর audio/document upload বা URL entry দেখানো হবে না।
