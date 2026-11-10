@@ -13,7 +13,9 @@ else{
     const textDefaults={topLabel:"বিশেষ একটি দিন • বিশেষ একজন মানুষ",greetingTitle:"শুভ জন্মদিন",overlayTitle:"একটি সুন্দর চমক অপেক্ষা করছে!",overlayMessage:"নিচের বোতামে চাপ দিয়ে আয়োজন, গান ও আতশবাজি শুরু করুন।",startButtonText:"🎉 উদযাপন শুরু করুন",overlayNote:"আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।",ageText:"বছর পূর্তির আনন্দ উদযাপন",attachmentLabel:"📎 সংযুক্ত ফাইল খুলুন",cakeTitle:"মনের ইচ্ছা পূরণের কামনা করুন ✨",cakeInstruction:"প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।",blowButtonText:"🌬️ সব মোমবাতি নিভিয়ে দিন",relightButtonText:"🕯️ আবার জ্বালান",cakeMessageText:"মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!",footerText:"ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য"};
     // রিসিভার পেইজটি স্থায়ীভাবে জন্মদিনের থিমে থাকবে; ড্যাশবোর্ডে অতিরিক্ত কনটেন্ট কাস্টমাইজেশন নেই।
     $("recipientName").textContent=d.recipientName||"আপনাকে!";
-    $("senderNameDisplay").textContent=d.senderName||"একজন শুভাকাঙ্ক্ষীর পক্ষ থেকে";
+    const senderName=(d.senderName||"").trim();
+    $("senderNameDisplay").textContent=senderName;
+    $("senderNameDisplay").style.display=senderName?"":"none";
     $("customMessage").textContent=d.message||"হোক না এই বিশেষ দিন আপনার জন্যই আনন্দময়, সুখ ও সফলতায় ভরা।";
     $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} ${textDefaults.ageText}`:"";
     document.title=`শুভ জন্মদিন — ${d.recipientName||""}`;
