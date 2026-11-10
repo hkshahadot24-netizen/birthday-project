@@ -39,22 +39,20 @@ giftTrigger.addEventListener("click",()=>{
     // Restart the unfolding animation on every open.
     void birthdayLetter.offsetWidth;
     birthdayLetter.classList.add("show");
-    giftTrigger.querySelector(".gift-icon").textContent="🎉";
-    giftTrigger.querySelectorAll("span")[4].textContent="উপহারটি খুলে গেছে!";
+    $("giftHint").textContent="উপহারটি খুলে গেছে!";
     setTimeout(()=>birthdayLetter.scrollIntoView({behavior:"smooth",block:"center"}),180);
   }else{
     birthdayLetter.classList.remove("show");
-    giftTrigger.querySelector(".gift-icon").textContent="🎁";
-    giftTrigger.querySelectorAll("span")[4].textContent="গিফট বক্স খুলতে এখানে চাপ দিন";
+    $("giftHint").textContent="উপহারটি খুলে দেখতে এখানে চাপ দিন";
   }
 });
 
 // Candles: tap individually; blow button turns all flames off.
 function extinguish(c){c.classList.add("out");}
-document.querySelectorAll(".candle").forEach(c=>c.addEventListener("click",()=>{extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক! 🎉";}));
-function blowAll(){document.querySelectorAll(".candle").forEach(extinguish);$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক! ✨";}
-$("blowBtn").onclick=blowAll;$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=[...document.querySelectorAll(".candle")].find(x=>!x.classList.contains("out"));if(c)extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="শুভ জন্মদিন! 🎊";};
-$("relightBtn").onclick=()=>{document.querySelectorAll(".candle").forEach(c=>c.classList.remove("out"));$("cakeMessage").textContent="মোমবাতিগুলো আবার জ্বলে উঠেছে!";};
+document.querySelectorAll(".candle").forEach(c=>c.addEventListener("click",()=>{extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক!";}));
+function blowAll(){document.querySelectorAll(".candle").forEach(extinguish);$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক।";}
+$("blowBtn").onclick=blowAll;$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=[...document.querySelectorAll(".candle")].find(x=>!x.classList.contains("out"));if(c)extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="শুভ জন্মদিন!";};
+$("relightBtn").onclick=()=>{document.querySelectorAll(".candle").forEach(c=>c.classList.remove("out"));$("cakeMessage").textContent="মোমবাতিগুলো আবার জ্বলে উঠেছে।";};
 
 // "Happy Birthday to You" সুরটি Web Audio দিয়ে তৈরি; বাইরের অডিও ফাইল লাগে না।
 let audioCtx=null,musicTimer=null,musicOn=false;
