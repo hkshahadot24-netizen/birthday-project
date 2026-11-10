@@ -18,9 +18,9 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .top-label{letter-spacing:.16em;color:#d8f8ff;text-shadow:0 0 12px #00bfff;font-size:clamp(11px,2vw,14px)}
 .photo-frame{position:relative;display:inline-grid;place-items:center;padding:8px;border-radius:50%;background:conic-gradient(#00eaff,#f000df,#ffcf35,#00eaff);box-shadow:0 0 22px #00d9ff,0 0 55px #ed00ff99;margin:4px auto 25px}
 .photo-frame:after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid #ffffffa8;box-shadow:0 0 15px #fff8}
-.photo{display:block;width:clamp(110px,19vw,166px);height:clamp(110px,19vw,166px);object-fit:cover;border-radius:50%;border:4px solid #fff;background:#fff}
+.photo{display:block;width:clamp(200px,42vw,220px);height:clamp(200px,42vw,220px);object-fit:cover;border-radius:50%;border:4px solid #fff;background:#fff}
 .photo-frame.hidden{display:none}
-#photoFallback{width:clamp(110px,19vw,166px);height:clamp(110px,19vw,166px);border-radius:50%;display:grid;place-items:center;margin:4px auto 25px;background:radial-gradient(circle at 30% 20%,#fff,#5ceaff 12%,#1449c7 50%,#090b3e 75%);border:5px solid #fbd34d;box-shadow:0 0 25px #00d9ff,0 0 50px #e900ff88}
+#photoFallback{width:clamp(200px,42vw,220px);height:clamp(200px,42vw,220px);border-radius:50%;display:grid;place-items:center;margin:4px auto 25px;background:radial-gradient(circle at 30% 20%,#fff,#5ceaff 12%,#1449c7 50%,#090b3e 75%);border:5px solid #fbd34d;box-shadow:0 0 25px #00d9ff,0 0 50px #e900ff88}
 .crown{position:absolute;z-index:4;width:76px;height:52px;top:-37px;left:50%;transform:translateX(-50%) rotate(-8deg);filter:drop-shadow(0 5px 4px #0009)}
 .crown svg{width:100%;height:100%;overflow:visible}
 .hero-title{font-size:clamp(2.5rem,7vw,5.3rem);line-height:1.05;font-weight:800;text-shadow:0 5px 12px #000b;margin:0}
@@ -32,8 +32,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .happy-script:after{content:"";position:absolute;left:17%;right:12%;height:9px;bottom:-7px;border-bottom:6px solid #ffbd24;border-radius:50%;filter:drop-shadow(0 3px 2px #6b3000);transform:rotate(-1deg)}
 .message-panel{width:min(100%,900px);margin:28px auto 0;padding:23px 22px 25px;border-radius:34px;background:linear-gradient(130deg,#050b48ed,#17083fe8 52%,#33052fdd);border:3px solid transparent;background-clip:padding-box;position:relative;box-shadow:0 0 17px #00dfff,0 0 34px #ed00ff88,inset 0 0 28px #ffffff0d}
 .message-panel:before{content:"";position:absolute;inset:-3px;border-radius:36px;padding:3px;background:linear-gradient(110deg,#00eaff,#125dff,#ff00bc,#ff314d,#00eaff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-.message-title{font-size:clamp(20px,3vw,30px);font-weight:800;color:#dff6ff;text-shadow:0 2px 7px #000}
-.message-subtitle{font-size:clamp(19px,3vw,27px);font-weight:800;color:#ffdb29;text-shadow:0 2px 7px #000}
+.message-title{font-size:clamp(30px,5.8vw,48px);line-height:1.2;font-weight:800;color:#fff;text-shadow:0 3px 12px #00cfff,0 5px 10px #000;margin:0 auto 10px}
+.message-subtitle{display:none}
 .message-copy{font-size:clamp(17px,2.8vw,25px);line-height:1.6;color:#fff;text-shadow:0 2px 5px #000;white-space:pre-wrap;margin:13px auto 0;max-width:760px}
 .divider-star{display:flex;align-items:center;justify-content:center;gap:14px;color:#ffca36;font-size:25px;line-height:1;margin:8px auto}
 .divider-star:before,.divider-star:after{content:"";height:1px;width:min(34%,220px);background:linear-gradient(90deg,transparent,#ed39ff,#ffcb32)}
@@ -100,29 +100,16 @@ button{cursor:pointer}
 <main class="content min-h-screen flex flex-col items-center text-center px-4 py-9 sm:py-14">
 <p class="top-label mb-6">বিশেষ একটি দিন · বিশেষ একজন মানুষ</p>
 <div id="photoFrame" class="photo-frame hidden"><div class="crown" aria-hidden="true"><svg viewBox="0 0 100 70"><defs><linearGradient id="cg" x2="0" y2="1"><stop stop-color="#fff5a5"/><stop offset=".45" stop-color="#ffc21e"/><stop offset="1" stop-color="#a95700"/></linearGradient></defs><path d="M8 18 L28 34 L38 5 L53 32 L75 7 L91 19 L82 58 L17 58Z" fill="url(#cg)" stroke="#ffe88a" stroke-width="3"/><path d="M16 49H84L82 62H18Z" fill="#e99a08" stroke="#fff0a0" stroke-width="2"/><g fill="#fff4ae"><circle cx="8" cy="17" r="5"/><circle cx="38" cy="5" r="5"/><circle cx="75" cy="7" r="5"/><circle cx="91" cy="18" r="5"/></g><g fill="#ff4b19"><circle cx="28" cy="39" r="3"/><circle cx="53" cy="38" r="3"/><circle cx="75" cy="39" r="3"/></g></svg></div><img id="recipientPhoto" class="photo" alt="Birthday recipient"></div>
-<div id="photoFallback" class="mb-5" aria-hidden="true"></div>
+<div id="photoFallback" class="mb-5" aria-label="প্রোফাইল ছবির বিকল্প"><span style="font-size:76px;filter:drop-shadow(0 5px 8px #0008)">🎂</span></div>
 <h1 class="hero-title silver-text">শুভ জন্মদিন<span id="recipientName" class="hero-name gold-text">আপনাকে!</span></h1>
 <p id="ageLine" class="age-line"></p>
 <h2 class="happy-script">Happy Birthday</h2>
 <section class="message-panel">
-<div class="message-title">আপনার জন্ম একটি বিশেষ উপহার</div>
-<div class="message-subtitle">উপহারটি খুলে দেখুন</div>
+<h2 id="senderNameDisplay" class="message-title">শুভাকাঙ্ক্ষী</h2>
 <div class="divider-star">★</div>
 <p id="customMessage" class="message-copy">হোক না এই বিশেষ দিন আপনার জন্যই আনন্দময়, সুখ ও সফলতায় ভরা।</p>
-</section>
-<section class="gift-area">
-<button id="giftTrigger" class="gift-trigger" type="button" aria-expanded="false" aria-controls="birthdayLetter">
-<span class="gift-glow"></span><span class="gift-stage" aria-hidden="true"><span class="gift-box"></span><span class="gift-lid"></span><span class="gift-bow"></span></span>
-<span style="position:relative;z-index:2;font-size:20px;font-weight:800;color:#fff0a8">আপনার জন্য একটি বিশেষ উপহার</span>
-<span id="giftHint" style="position:relative;z-index:2;font-size:15px;color:#e4eaff;margin-top:5px">উপহারটি খুলে দেখতে এখানে চাপ দিন</span>
-</button>
-<article id="birthdayLetter" class="letter-panel" aria-live="polite">
-<h2 class="letter-heading">হৃদয়ের গভীর থেকে লেখা একটি চিঠি</h2>
-
-<a id="attachmentLink" class="hidden inline-block mt-5 rounded-full bg-amber-900/10 px-5 py-3 text-sm font-bold text-amber-900" target="_blank" rel="noopener">সংযুক্ত ফাইল খুলুন</a>
-<span class="letter-seal" aria-hidden="true">★</span>
-</article>
-<audio id="birthdayAudio" class="hidden" controls preload="none"></audio>
+<audio id="birthdayAudio" class="hidden mt-5 mx-auto" controls preload="none"></audio>
+<a id="attachmentLink" class="hidden inline-block mt-5 rounded-full bg-white/10 px-5 py-3 text-sm font-bold text-white" target="_blank" rel="noopener">সংযুক্ত ফাইল খুলুন</a>
 </section>
 <section class="cake-section">
 <h2 class="font-extrabold text-xl sm:text-2xl text-yellow-100 mb-2">আপনার মনের ইচ্ছা পূরণ হোক</h2>

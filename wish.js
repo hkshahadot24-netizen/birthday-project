@@ -1,58 +1,51 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 import { firebaseConfig } from "./firebase-config.js";
-const app=initializeApp(firebaseConfig),db=getFirestore(app),$=id=>document.getElementById(id);
+const app=initializeApp(firebaseConfig),db=getFirestore(app),storage=getStorage(app),$=id=>document.getElementById(id);
 const id=new URLSearchParams(location.search).get("id");
 function showError(msg){$("recipientName").textContent="আয়োজনটি পাওয়া যায়নি";$("customMessage").textContent=msg;$("ageLine").textContent="";document.title="Birthday page not found";}
 if(!id||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(id)){showError("জন্মদিনের লিংকটি সঠিক নয়। অনুগ্রহ করে লিংকটি পরীক্ষা করুন।");}
 else{
-  onSnapshot(doc(db,"wishes",id),snap=>{
+  onSnapshot(doc(db,"wishes",id),async snap=>{
     if(!snap.exists()){showError("জন্মদিনের পাতাটি মুছে ফেলা হয়েছে অথবা লিংকটি ভুল।");return;}
     const d=snap.data();
     const textDefaults={topLabel:"বিশেষ একটি দিন • বিশেষ একজন মানুষ",greetingTitle:"শুভ জন্মদিন",overlayTitle:"একটি সুন্দর চমক অপেক্ষা করছে!",overlayMessage:"নিচের বোতামে চাপ দিয়ে আয়োজন, গান ও আতশবাজি শুরু করুন।",startButtonText:"🎉 উদযাপন শুরু করুন",overlayNote:"আপনি বোতামে চাপ দেওয়ার পরই গান বাজবে।",ageText:"বছর পূর্তির আনন্দ উদযাপন",attachmentLabel:"📎 সংযুক্ত ফাইল খুলুন",cakeTitle:"মনের ইচ্ছা পূরণের কামনা করুন ✨",cakeInstruction:"প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো নিভিয়ে দিন।",blowButtonText:"🌬️ সব মোমবাতি নিভিয়ে দিন",relightButtonText:"🕯️ আবার জ্বালান",cakeMessageText:"মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন!",footerText:"ভালোবাসায় তৈরি ❤️ আপনার বিশেষ দিনের জন্য"};
     // রিসিভার পেইজটি স্থায়ীভাবে জন্মদিনের থিমে থাকবে; ড্যাশবোর্ডে অতিরিক্ত কনটেন্ট কাস্টমাইজেশন নেই।
     $("recipientName").textContent=d.recipientName||"আপনাকে!";
+    $("senderNameDisplay").textContent=d.senderName||"একজন শুভাকাঙ্ক্ষীর পক্ষ থেকে";
     $("customMessage").textContent=d.message||"হোক না এই বিশেষ দিন আপনার জন্যই আনন্দময়, সুখ ও সফলতায় ভরা।";
-    $("letterMessage").textContent=d.message||"আপনার দিনটি ভালোবাসা, হাসি ও সুন্দর স্মৃতিতে ভরে উঠুক।";
     $("ageLine").textContent=d.age!==null&&d.age!==undefined?`${d.age} ${textDefaults.ageText}`:"";
     document.title=`শুভ জন্মদিন — ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
-    if(d.photoUrl){
-      $("recipientPhoto").onerror=()=>{
-        $("photoFrame").classList.add("hidden");
-        $("photoFallback").classList.remove("hidden");
-      };
-      $("recipientPhoto").onload=()=>{
-        $("photoFrame").classList.remove("hidden");
-        $("photoFallback").classList.add("hidden");
-      };
-      $("recipientPhoto").src=d.photoUrl;
+    const photoEl=$("recipientPhoto"),frame=$("photoFrame"),fallback=$("photoFallback");
+    const showFallback=()=>{frame.classList.add("hidden");fallback.classList.remove("hidden");};
+    const showPhoto=()=>{frame.classList.remove("hidden");fallback.classList.add("hidden");};
+    photoEl.onload=showPhoto;
+    photoEl.onerror=showFallback;
+    photoEl.referrerPolicy="no-referrer";
+    photoEl.decoding="async";
+    photoEl.loading="eager";
+    const rawPhoto=typeof d.photoUrl==="string"?d.photoUrl.trim():"";
+    if(rawPhoto){
+      try{
+        let photoUrl=rawPhoto;
+        if(photoUrl.startsWith("gs://")){
+          photoUrl=await getDownloadURL(storageRef(storage,photoUrl));
+        }
+        const parsed=new URL(photoUrl,location.href);
+        if(!["https:","http:"].includes(parsed.protocol))throw new Error("Unsupported image URL");
+        if(parsed.hostname.endsWith("googleusercontent.com")&&parsed.searchParams.has("sz"))parsed.searchParams.set("sz","512");
+        photoEl.src=parsed.href;
+        if(photoEl.complete&&photoEl.naturalWidth>0)showPhoto();
+      }catch(_){showFallback();}
     }else{
-      $("photoFrame").classList.add("hidden");
-      $("recipientPhoto").removeAttribute("src");
-      $("photoFallback").classList.remove("hidden");
+      photoEl.removeAttribute("src");
+      showFallback();
     }
   },err=>showError("জন্মদিনের আয়োজনটি লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।"));
 }
-
-// Gift box opens the hidden birthday letter with a treasure-chest reveal.
-const giftTrigger=$("giftTrigger"),birthdayLetter=$("birthdayLetter");
-giftTrigger.addEventListener("click",()=>{
-  const isOpen=giftTrigger.classList.toggle("open");
-  giftTrigger.setAttribute("aria-expanded",String(isOpen));
-  if(isOpen){
-    birthdayLetter.classList.remove("show");
-    // Restart the unfolding animation on every open.
-    void birthdayLetter.offsetWidth;
-    birthdayLetter.classList.add("show");
-    $("giftHint").textContent="উপহারটি খুলে গেছে!";
-    setTimeout(()=>birthdayLetter.scrollIntoView({behavior:"smooth",block:"center"}),180);
-  }else{
-    birthdayLetter.classList.remove("show");
-    $("giftHint").textContent="উপহারটি খুলে দেখতে এখানে চাপ দিন";
-  }
-});
 
 // Candles: tap individually; blow button turns all flames off.
 function extinguish(c){c.classList.add("out");}

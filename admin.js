@@ -84,8 +84,8 @@ form.addEventListener("submit",async e=>{
   const name=$("recipientName").value.trim(),id=$("slug").value.trim(),photo=$("photoUrl").value.trim();
   if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)){$("formStatus").textContent="সঠিক শেয়ার আইডি দিন। ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও হাইফেন ব্যবহার করুন।";return;}
   if(photo&&!/^https:\/\/\S+$/i.test(photo)){$("formStatus").textContent="ছবির লিংক https:// দিয়ে শুরু হতে হবে।";return;}
-  const data={ownerUid:user.uid,eventName:"শুভ জন্মদিন",recipientName:name,age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,photoDeleteUrl:$("photoDeleteUrl").value.trim()||null,audioUrl:$("audioUrl").value.trim()||null,attachmentUrl:$("attachmentUrl").value.trim()||null,slug:id,updatedAt:serverTimestamp()};
-  if(!name||!data.message){$("formStatus").textContent="নাম ও জন্মদিনের শুভেচ্ছাবার্তা লিখুন।";return;}
+  const data={ownerUid:user.uid,eventName:"শুভ জন্মদিন",recipientName:name,senderName:$("senderName").value.trim(),age:$("age").value?Number($("age").value):null,birthDate:$("birthDate").value||null,message:$("message").value.trim(),photoUrl:photo||null,photoDeleteUrl:$("photoDeleteUrl").value.trim()||null,audioUrl:$("audioUrl").value.trim()||null,attachmentUrl:$("attachmentUrl").value.trim()||null,slug:id,updatedAt:serverTimestamp()};
+  if(!name||!data.senderName||!data.message){$("formStatus").textContent="জন্মদিনের নাম, প্রেরকের নাম ও শুভেচ্ছাবার্তা লিখুন।";return;}
   $("saveBtn").disabled=true;$("formStatus").textContent="সংরক্ষণ করা হচ্ছে...";
   try{
     const ref=doc(db,"wishes",id),existing=await getDoc(ref);
@@ -126,7 +126,7 @@ $("wishRows").addEventListener("click",async e=>{
     if(action==="edit"){
       const s=await getDoc(doc(db,"wishes",id));if(!s.exists()||s.data().ownerUid!==user.uid)return;
       const d=s.data();editingId=id;
-      const fields=["recipientName","age","birthDate","message","photoUrl","audioUrl","attachmentUrl"];
+      const fields=["recipientName","senderName","age","birthDate","message","photoUrl","audioUrl","attachmentUrl"];
       fields.forEach(k=>{if($(k))$(k).value=d[k]??"";});$("photoDeleteUrl").value=d.photoDeleteUrl||"";selectedPhotoFile=null;clearLocalPhotoPreview();renderPhotoPreview(d.photoUrl||"");$("photoFile").value="";$("uploadStatus").textContent=d.photoUrl?"আগের ছবি সংযুক্ত আছে। নতুন ছবি নির্বাচন করে পরিবর্তন করতে পারবেন।":"";$("slug").value=id;
       $("formTitle").textContent="শুভেচ্ছার পাতা সম্পাদনা করুন";$("saveBtn").textContent="পরিবর্তন সংরক্ষণ করুন";$("formStatus").textContent=`সম্পাদনা করছেন: ${id}`;window.scrollTo({top:0,behavior:"smooth"});
     }
