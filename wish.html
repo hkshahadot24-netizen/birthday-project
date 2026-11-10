@@ -20,13 +20,13 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .photo-frame{position:relative;display:inline-grid;place-items:center;padding:8px;border-radius:50%;background:conic-gradient(#00eaff,#f000df,#ffcf35,#00eaff);box-shadow:0 0 22px #00d9ff,0 0 55px #ed00ff99;margin:4px auto 25px}
 .photo-frame:after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid #ffffffa8;box-shadow:0 0 15px #fff8}
 .photo{display:block;width:clamp(200px,42vw,220px);height:clamp(200px,42vw,220px);object-fit:cover;border-radius:50%;border:4px solid #fff;background:#fff}
-.photo-frame.hidden{display:none}
-#photoFallback{width:clamp(200px,42vw,220px);height:clamp(200px,42vw,220px);border-radius:50%;display:grid;place-items:center;margin:4px auto 25px;background:radial-gradient(circle at 30% 20%,#fff,#5ceaff 12%,#1449c7 50%,#090b3e 75%);border:5px solid #fbd34d;box-shadow:0 0 25px #00d9ff,0 0 50px #e900ff88}
+.photo-frame.hidden{display:none!important}
+
 .crown{position:absolute;z-index:4;width:76px;height:52px;top:-37px;left:50%;transform:translateX(-50%) rotate(-8deg);filter:drop-shadow(0 5px 4px #0009)}
 .crown svg{width:100%;height:100%;overflow:visible}
 .hero-title{font-size:clamp(2.5rem,7vw,5.3rem);line-height:1.05;font-weight:800;text-shadow:0 2px 3px #000,0 6px 16px #000,0 0 22px #ffffff66;margin:0;filter:brightness(1.22) saturate(1.15)}
-.silver-text{background:linear-gradient(180deg,#fff 0%,#fff 22%,#e7edff 48%,#fff 68%,#aab8ed 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.3) drop-shadow(0 3px 2px #000) drop-shadow(0 0 12px #ffffff88)}
-.gold-text{background:linear-gradient(180deg,#fffbd0 0%,#ffe76a 25%,#ffc21a 52%,#ff9e00 75%,#fff4b0 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.28) saturate(1.2) drop-shadow(0 3px 1px #6a3100) drop-shadow(0 0 13px #ffcb3588) drop-shadow(0 8px 8px #0009)}
+.silver-text{background:linear-gradient(180deg,#ffffff 0%,#ffffff 18%,#f4fbff 34%,#b9d9ff 48%,#ffffff 61%,#829bc8 78%,#ffffff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.75) contrast(1.18) drop-shadow(0 2px 1px #fff9) drop-shadow(0 5px 3px #000) drop-shadow(0 0 12px #d9f5ff) drop-shadow(0 0 26px #ffffffcc)}
+.gold-text{background:linear-gradient(180deg,#fffef0 0%,#fff7a8 13%,#ffe34f 30%,#ffb900 48%,#fff28a 60%,#d87900 78%,#fff4bd 92%,#ffbd16 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.75) saturate(1.55) contrast(1.12) drop-shadow(0 2px 1px #fff8) drop-shadow(0 5px 2px #6a3100) drop-shadow(0 0 12px #ffd83d) drop-shadow(0 0 28px #ffb900cc) drop-shadow(0 9px 9px #000b)}
 .hero-name{display:block;font-size:clamp(2.2rem,6.4vw,4.8rem);line-height:1.18;margin-top:7px}
 .age-line{color:#fff0ad;text-shadow:0 0 12px #ffba26;font-size:clamp(15px,2.4vw,23px);font-weight:700;margin-top:12px}
 .happy-script{font-family:"Great Vibes",cursive;font-size:clamp(4rem,11vw,8rem);line-height:1.05;margin:0 auto 15px;white-space:nowrap;letter-spacing:-.025em;background:linear-gradient(180deg,#fff 0%,#fffdf0 27%,#ffdb55 52%,#e88700 76%,#fff8c8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.25) drop-shadow(0 5px 2px #000) drop-shadow(0 0 18px #ffca35cc);position:relative}
@@ -101,7 +101,7 @@ button{cursor:pointer}
 <main class="content min-h-screen flex flex-col items-center text-center px-4 py-9 sm:py-14">
 <p class="top-label mb-6">বিশেষ একটি দিন · বিশেষ একজন মানুষ</p>
 <div id="photoFrame" class="photo-frame hidden"><div class="crown" aria-hidden="true"><svg viewBox="0 0 100 70"><defs><linearGradient id="cg" x2="0" y2="1"><stop stop-color="#fff5a5"/><stop offset=".45" stop-color="#ffc21e"/><stop offset="1" stop-color="#a95700"/></linearGradient></defs><path d="M8 18 L28 34 L38 5 L53 32 L75 7 L91 19 L82 58 L17 58Z" fill="url(#cg)" stroke="#ffe88a" stroke-width="3"/><path d="M16 49H84L82 62H18Z" fill="#e99a08" stroke="#fff0a0" stroke-width="2"/><g fill="#fff4ae"><circle cx="8" cy="17" r="5"/><circle cx="38" cy="5" r="5"/><circle cx="75" cy="7" r="5"/><circle cx="91" cy="18" r="5"/></g><g fill="#ff4b19"><circle cx="28" cy="39" r="3"/><circle cx="53" cy="38" r="3"/><circle cx="75" cy="39" r="3"/></g></svg></div><img id="recipientPhoto" class="photo" alt="Birthday recipient"></div>
-<div id="photoFallback" class="mb-5" aria-label="প্রোফাইল ছবির বিকল্প"><span style="font-size:76px;filter:drop-shadow(0 5px 8px #0008)">🎂</span></div>
+
 <h1 class="hero-title silver-text">শুভ জন্মদিন<span id="recipientName" class="hero-name gold-text">আপনাকে!</span></h1>
 <p id="ageLine" class="age-line"></p>
 <h2 class="happy-script">Happy Birthday</h2>

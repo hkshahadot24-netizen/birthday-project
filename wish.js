@@ -21,11 +21,11 @@ else{
     document.title=`শুভ জন্মদিন — ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
-    const photoEl=$("recipientPhoto"),frame=$("photoFrame"),fallback=$("photoFallback");
-    const showFallback=()=>{frame.classList.add("hidden");fallback.classList.remove("hidden");};
-    const showPhoto=()=>{frame.classList.remove("hidden");fallback.classList.add("hidden");};
+    const photoEl=$("recipientPhoto"),frame=$("photoFrame");
+    const hidePhoto=()=>frame.classList.add("hidden");
+    const showPhoto=()=>frame.classList.remove("hidden");
     photoEl.onload=showPhoto;
-    photoEl.onerror=showFallback;
+    photoEl.onerror=hidePhoto;
     photoEl.referrerPolicy="no-referrer";
     photoEl.decoding="async";
     photoEl.loading="eager";
@@ -41,10 +41,10 @@ else{
         if(parsed.hostname.endsWith("googleusercontent.com")&&parsed.searchParams.has("sz"))parsed.searchParams.set("sz","512");
         photoEl.src=parsed.href;
         if(photoEl.complete&&photoEl.naturalWidth>0)showPhoto();
-      }catch(_){showFallback();}
+      }catch(_){hidePhoto();}
     }else{
       photoEl.removeAttribute("src");
-      showFallback();
+      hidePhoto();
     }
   },err=>showError("জন্মদিনের আয়োজনটি লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।"));
 }
