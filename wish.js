@@ -17,10 +17,37 @@ else{
     document.title=`শুভ জন্মদিন — ${d.recipientName||""}`;
     if(d.attachmentUrl){$("attachmentLink").href=d.attachmentUrl;$("attachmentLink").classList.remove("hidden");}else{$("attachmentLink").classList.add("hidden");}
     if(d.audioUrl){$("birthdayAudio").src=d.audioUrl;$("birthdayAudio").classList.remove("hidden");}else{$("birthdayAudio").removeAttribute("src");$("birthdayAudio").classList.add("hidden");}
-    if(d.photoUrl){$("recipientPhoto").src=d.photoUrl;$("recipientPhoto").classList.remove("hidden");$("photoFallback").classList.add("hidden");}
-    else{$("recipientPhoto").classList.add("hidden");$("photoFallback").classList.remove("hidden");}
+    if(d.photoUrl){
+      $("recipientPhoto").src=d.photoUrl;
+      $("photoFrame").classList.remove("hidden");
+      $("photoFallback").classList.add("hidden");
+    }else{
+      $("photoFrame").classList.add("hidden");
+      $("recipientPhoto").removeAttribute("src");
+      $("photoFallback").classList.remove("hidden");
+    }
   },err=>showError("জন্মদিনের আয়োজনটি লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।"));
 }
+
+// Gift box opens the hidden birthday letter with a treasure-chest reveal.
+const giftTrigger=$("giftTrigger"),birthdayLetter=$("birthdayLetter");
+giftTrigger.addEventListener("click",()=>{
+  const isOpen=giftTrigger.classList.toggle("open");
+  giftTrigger.setAttribute("aria-expanded",String(isOpen));
+  if(isOpen){
+    birthdayLetter.classList.remove("show");
+    // Restart the unfolding animation on every open.
+    void birthdayLetter.offsetWidth;
+    birthdayLetter.classList.add("show");
+    giftTrigger.querySelector(".gift-icon").textContent="🎉";
+    giftTrigger.querySelectorAll("span")[4].textContent="উপহারটি খুলে গেছে!";
+    setTimeout(()=>birthdayLetter.scrollIntoView({behavior:"smooth",block:"center"}),180);
+  }else{
+    birthdayLetter.classList.remove("show");
+    giftTrigger.querySelector(".gift-icon").textContent="🎁";
+    giftTrigger.querySelectorAll("span")[4].textContent="গিফট বক্স খুলতে এখানে চাপ দিন";
+  }
+});
 
 // Candles: tap individually; blow button turns all flames off.
 function extinguish(c){c.classList.add("out");}
