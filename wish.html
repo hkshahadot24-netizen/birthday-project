@@ -105,6 +105,10 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 @media(max-width:430px){.message-panel{padding:20px 14px;border-radius:24px}.gift-trigger{min-height:220px}.cake-wrap{transform:scale(.88);transform-origin:top center;margin-bottom:-25px}.cake-section{padding:22px 10px}.hero-name{overflow-wrap:anywhere}.happy-script{font-size:clamp(3.7rem,15vw,5rem)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
 button{cursor:pointer}
+
+.candle-wish-pop{position:relative;z-index:12;max-width:560px;margin:16px auto 0;padding:15px 20px;border:1px solid #ffd76b99;border-radius:18px;background:linear-gradient(135deg,#fff8d91f,#ffc83d18 45%,#ffffff0c);box-shadow:0 10px 28px #0005,inset 0 1px 0 #ffffff55;backdrop-filter:blur(10px);color:#fff6c7;text-align:center;font-size:clamp(16px,2.8vw,20px);font-weight:800;opacity:0;transform:translateY(12px) scale(.96);pointer-events:none;transition:opacity .35s ease,transform .35s ease}
+.candle-wish-pop.show{opacity:1;transform:translateY(0) scale(1)}
+.candle-wish-pop .wish-spark{display:block;color:#ffd65b;font-size:22px;margin-bottom:3px;text-shadow:0 0 12px #ffcf4a}
 </style>
 </head>
 <body>
@@ -141,6 +145,7 @@ button{cursor:pointer}
 <button id="relightBtn" class="action-btn" type="button">🕯️ আবার জ্বালান</button>
 </div>
 <p id="micStatus" class="mic-status" role="status" aria-live="polite">মাইক্রোফোন চালু করে কেকের দিকে ১–২ সেকেন্ড ফুঁ দিন।</p>
+<div id="candleWishPop" class="candle-wish-pop" role="status" aria-live="polite"><span class="wish-spark">✦ ✨ ✦</span><span id="candleWishText"></span></div>
 <p id="cakeMessage" class="text-cyan-100 text-sm mt-4" aria-live="polite">মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন।</p>
 </section>
 <footer class="text-xs text-white/50 mt-12 pb-5">ভালোবাসা ও শুভকামনায় তৈরি · আপনার বিশেষ দিনের জন্য</footer>
