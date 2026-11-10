@@ -82,6 +82,22 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 @keyframes flicker{to{transform:rotate(8deg) scale(.85)}}
 .action-btn{border:1px solid #ffffff30;background:linear-gradient(145deg,#ffffff20,#ffffff08);border-radius:999px;padding:11px 18px;font-weight:700;box-shadow:0 6px 15px #0004;color:#fff}
 .action-btn:hover{border-color:#ffd65c;box-shadow:0 0 16px #ffd65c66}
+/* Premium cake finish + microphone interaction */
+.cake-section{background:radial-gradient(ellipse at 50% 38%,#20296dcc 0%,#111747e8 58%,#0b0b32ee 100%);border:1px solid #8aa8ff88;box-shadow:0 18px 48px #0009,0 0 28px #3b65ff22,inset 0 1px 0 #ffffff35,inset 0 -18px 40px #03051d66}
+.cake-wrap{filter:drop-shadow(0 22px 20px #0009) drop-shadow(0 0 14px #ffd47a22)}
+.cake-body{background:linear-gradient(90deg,#7b2c16 0%,#c66a37 8%,#ffe5b1 22%,#fff0c9 43%,#f2c27d 72%,#a84925 100%);box-shadow:inset 0 7px 13px #fff9,inset 0 -18px 0 #8d3c20,inset 0 -23px 0 #5e241a,0 14px 22px #0007;overflow:hidden}
+.cake-body:after{content:"";position:absolute;left:10%;right:10%;top:47px;height:2px;border-radius:50%;background:linear-gradient(90deg,transparent,#fff9,transparent);box-shadow:0 2px 8px #fff6}
+.cake-icing{background:linear-gradient(180deg,#fff 0%,#fff8f0 44%,#f4d6c5 78%,#d89a79 100%);box-shadow:0 7px 0 #d99d7c,inset 0 5px 10px #fff}
+.cake-plate{height:28px;background:linear-gradient(180deg,#fff 0%,#e6edff 28%,#8799c8 62%,#f8fbff 84%,#6575a5 100%);box-shadow:0 9px 16px #0008,inset 0 4px 6px #fff}
+.candle{background:repeating-linear-gradient(45deg,#fff 0 7px,#f03d88 7px 14px);box-shadow:inset -3px 0 4px #7b1648, inset 2px 0 3px #fff9,0 4px 8px #0006;border:1px solid #ffffff88}
+.flame{width:14px;height:24px;left:0;background:radial-gradient(ellipse at 50% 72%,#fff 0 12%,#fff5a3 30%,#ffbd35 58%,#ff6b12 82%);filter:drop-shadow(0 0 5px #fff3a1) drop-shadow(0 0 12px #ffb21d);animation:flicker .55s ease-in-out infinite alternate}
+.candle.out{opacity:.9}
+.candle.out:after{content:"";position:absolute;top:-11px;left:5px;width:5px;height:13px;border-radius:50%;background:#aeb6ce;filter:blur(2px);opacity:.75;animation:smoke .9s ease-out forwards}
+@keyframes smoke{to{transform:translateY(-23px) scale(2);opacity:0}}
+.mic-btn{background:linear-gradient(135deg,#0b8d88,#1555b8 55%,#5736a8);border-color:#7cf9ed88;box-shadow:0 7px 20px #00cfcf33,inset 0 1px 0 #ffffff55}
+.mic-btn.listening{background:linear-gradient(135deg,#bd285f,#8b1c75 55%,#4621a0);border-color:#ffb1d8;animation:micPulse 1s infinite}
+.mic-status{min-height:24px;margin:12px auto 0;color:#bdefff;font-size:14px;text-shadow:0 2px 4px #000;text-align:center}
+@keyframes micPulse{50%{box-shadow:0 0 0 7px #ff5ba522,0 0 24px #ff5ba588}}
 #startOverlay{position:fixed;inset:0;z-index:10;background:radial-gradient(ellipse at 50% 35%,#1c3295f5,#08051df7 72%);display:grid;place-items:center;padding:22px;transition:opacity .5s}
 #startOverlay.hidden{opacity:0;pointer-events:none}
 .start-card{width:min(100%,440px);padding:35px 25px;text-align:center;border-radius:28px}
@@ -114,12 +130,17 @@ button{cursor:pointer}
 </section>
 <section class="cake-section">
 <h2 class="font-extrabold text-xl sm:text-2xl text-yellow-100 mb-2">আপনার মনের ইচ্ছা পূরণ হোক</h2>
-<p class="text-sm text-blue-100/80 mb-3">প্রতিটি মোমবাতিতে চাপ দিন অথবা সবগুলো একসঙ্গে নিভিয়ে দিন।</p>
+<p class="text-sm text-blue-100/80 mb-3">মাইক্রোফোন চালু করে কেকের দিকে ফুঁ দিন—মোমবাতিগুলো নিভে যাবে।</p>
 <div class="cake-wrap" id="cake" aria-label="Interactive birthday cake">
 <div class="candle"><span class="flame"></span></div><div class="candle"><span class="flame"></span></div><div class="candle"><span class="flame"></span></div><div class="candle"><span class="flame"></span></div><div class="candle"><span class="flame"></span></div>
 <div class="cake-body"><div class="cake-icing"></div><i class="cake-drip"></i><i class="cake-drip"></i><i class="cake-drip"></i><i class="cake-drip"></i><i class="cake-drip"></i><i class="cake-drip"></i><i class="cream"></i><i class="cream"></i><i class="cream"></i><i class="cream"></i><i class="cream"></i><i class="cherry"></i><i class="cherry"></i><i class="cherry"></i><i class="cherry"></i><i class="cherry"></i></div><div class="cake-plate"></div>
 </div>
-<div class="flex flex-wrap justify-center gap-3 mt-2"><button id="blowBtn" class="action-btn">সব মোমবাতি নিভিয়ে দিন</button><button id="relightBtn" class="action-btn">আবার জ্বালান</button></div>
+<div class="flex flex-wrap justify-center gap-3 mt-2">
+<button id="micBlowBtn" class="action-btn mic-btn" type="button">🎙️ মাইক্রোফোন চালু করুন</button>
+<button id="blowBtn" class="action-btn" type="button">🌬️ হাতে নিভিয়ে দিন</button>
+<button id="relightBtn" class="action-btn" type="button">🕯️ আবার জ্বালান</button>
+</div>
+<p id="micStatus" class="mic-status" role="status" aria-live="polite">মাইক্রোফোন চালু করে কেকের দিকে ১–২ সেকেন্ড ফুঁ দিন।</p>
 <p id="cakeMessage" class="text-cyan-100 text-sm mt-4" aria-live="polite">মনে মনে একটি ইচ্ছা করুন, তারপর মোমবাতি নিভিয়ে দিন।</p>
 </section>
 <footer class="text-xs text-white/50 mt-12 pb-5">ভালোবাসা ও শুভকামনায় তৈরি · আপনার বিশেষ দিনের জন্য</footer>

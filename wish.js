@@ -49,12 +49,82 @@ else{
   },err=>showError("জন্মদিনের আয়োজনটি লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।"));
 }
 
-// Candles: tap individually; blow button turns all flames off.
-function extinguish(c){c.classList.add("out");}
-document.querySelectorAll(".candle").forEach(c=>c.addEventListener("click",()=>{extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক!";}));
-function blowAll(){document.querySelectorAll(".candle").forEach(extinguish);$("cakeMessage").textContent="আপনার মনের ইচ্ছা পূরণ হোক।";}
-$("blowBtn").onclick=blowAll;$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=[...document.querySelectorAll(".candle")].find(x=>!x.classList.contains("out"));if(c)extinguish(c);if([...document.querySelectorAll(".candle")].every(x=>x.classList.contains("out")))$("cakeMessage").textContent="শুভ জন্মদিন!";};
-$("relightBtn").onclick=()=>{document.querySelectorAll(".candle").forEach(c=>c.classList.remove("out"));$("cakeMessage").textContent="মোমবাতিগুলো আবার জ্বলে উঠেছে।";};
+// Candles: touch, manual blow button, or real microphone blow detection.
+const candleNodes=[...document.querySelectorAll(".candle")];
+let micStream=null,micContext=null,micFrame=0,micActive=false,blowStartedAt=0;
+function stopMic(message=""){
+  micActive=false;
+  if(micFrame)cancelAnimationFrame(micFrame);
+  micFrame=0;
+  if(micStream){micStream.getTracks().forEach(track=>track.stop());micStream=null;}
+  if(micContext){micContext.close().catch(()=>{});micContext=null;}
+  const btn=$("micBlowBtn");
+  if(btn){btn.classList.remove("listening");btn.textContent="🎙️ মাইক্রোফোন চালু করুন";}
+  if(message&&$("micStatus"))$("micStatus").textContent=message;
+}
+function finishCandles(message="আপনার মনের ইচ্ছা পূরণ হোক।"){
+  candleNodes.forEach(c=>c.classList.add("out"));
+  $("cakeMessage").textContent=message;
+  stopMic("✨ সব মোমবাতি নিভে গেছে!");
+}
+function extinguish(c){
+  c.classList.add("out");
+  if(candleNodes.every(x=>x.classList.contains("out")))finishCandles("আপনার মনের ইচ্ছা পূরণ হোক!");
+}
+candleNodes.forEach(c=>c.addEventListener("click",()=>extinguish(c)));
+function blowAll(){finishCandles("আপনার মনের ইচ্ছা পূরণ হোক।");}
+$("blowBtn").onclick=blowAll;
+$("cake").onclick=e=>{if(e.target.closest(".candle"))return;const c=candleNodes.find(x=>!x.classList.contains("out"));if(c)extinguish(c);};
+async function startMicBlow(){
+  if(!navigator.mediaDevices?.getUserMedia){
+    $("micStatus").textContent="এই ব্রাউজারে মাইক্রোফোন সুবিধা নেই। HTTPS ঠিকানা বা Chrome ব্যবহার করুন।";return;
+  }
+  try{
+    stopMic();
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)throw new Error("AudioContext unavailable");
+    micContext=new AC();
+    if(micContext.state==="suspended")await micContext.resume();
+    const source=micContext.createMediaStreamSource(micStream);
+    const analyser=micContext.createAnalyser();
+    analyser.fftSize=2048;analyser.smoothingTimeConstant=.25;source.connect(analyser);
+    const samples=new Uint8Array(analyser.fftSize);
+    const freq=new Uint8Array(analyser.frequencyBinCount);
+    micActive=true;blowStartedAt=0;
+    $("micBlowBtn").classList.add("listening");
+    $("micBlowBtn").textContent="🎙️ শুনছে… ফুঁ দিন";
+    $("micStatus").textContent="মাইক্রোফোন চালু হয়েছে—এবার কেকের দিকে ১–২ সেকেন্ড জোরে ফুঁ দিন।";
+    const detect=()=>{
+      if(!micActive||!micContext)return;
+      analyser.getByteTimeDomainData(samples);
+      analyser.getByteFrequencyData(freq);
+      let sum=0;for(let i=0;i<samples.length;i++){const v=(samples[i]-128)/128;sum+=v*v;}
+      const rms=Math.sqrt(sum/samples.length);
+      // A breath produces sustained broadband air noise, not just a short click.
+      let high=0,total=0;for(let i=2;i<freq.length;i++){const v=freq[i];total+=v;if(i>freq.length*.18)high+=v;}
+      const airy=total>0&&(high/total)>.42;
+      if(rms>.035&&airy){
+        if(!blowStartedAt)blowStartedAt=performance.now();
+        if(performance.now()-blowStartedAt>550){finishCandles("🌬️ দারুণ! আপনার ফুঁয়ে মোমবাতিগুলো নিভে গেছে।");return;}
+      }else blowStartedAt=0;
+      micFrame=requestAnimationFrame(detect);
+    };
+    detect();
+  }catch(err){
+    stopMic();
+    const msg=err?.name==="NotAllowedError"?"মাইক্রোফোন ব্যবহারের অনুমতি দিন, তারপর আবার চেষ্টা করুন।":
+      err?.name==="NotFoundError"?"কোনো মাইক্রোফোন পাওয়া যায়নি।":
+      "মাইক্রোফোন চালু করা যায়নি। HTTPS সংযোগ ও ব্রাউজার পারমিশন পরীক্ষা করুন।";
+    $("micStatus").textContent=msg;
+  }
+}
+$("micBlowBtn").onclick=()=>micActive?stopMic("মাইক্রোফোন বন্ধ করা হয়েছে।"):startMicBlow();
+$("relightBtn").onclick=()=>{
+  stopMic("মোমবাতি আবার জ্বালানো হয়েছে।");
+  candleNodes.forEach(c=>c.classList.remove("out"));
+  $("cakeMessage").textContent="মোমবাতিগুলো আবার জ্বলে উঠেছে।";
+};
 
 // "Happy Birthday to You" সুরটি Web Audio দিয়ে তৈরি; বাইরের অডিও ফাইল লাগে না।
 let audioCtx=null,musicTimer=null,musicOn=false;
